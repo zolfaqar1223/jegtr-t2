@@ -278,9 +278,26 @@ function setupShareModal() {
   const shareCount = document.getElementById('shareCount');
   const shareSelectAll = document.getElementById('shareSelectAll');
   const shareSelectNone = document.getElementById('shareSelectNone');
-  const shareQuarters = document.getElementById('shareQuarters');
+  let shareQuartersEl = document.getElementById('shareQuarters');
   let shareSelection = new Set();
   let selectedQuarters = new Set();
+
+  // Fallback: hvis kvartal‑chips ikke findes i HTML (cache/ældre markup), så opret dem dynamisk
+  if (!shareQuartersEl && shareList && shareList.parentElement) {
+    const host = shareList.parentElement;
+    const row = document.createElement('div');
+    row.id = 'shareQuarters';
+    row.className = 'chips';
+    ['Q1','Q2','Q3','Q4'].forEach(q => {
+      const s = document.createElement('span');
+      s.className = 'chip glow';
+      s.dataset.q = q;
+      s.textContent = q;
+      row.appendChild(s);
+    });
+    host.insertBefore(row, shareList);
+    shareQuartersEl = row;
+  }
 
   function renderShareList(q = '') {
     if (!shareList) return;
@@ -379,14 +396,21 @@ function setupShareModal() {
     // preselect: if previous selection exists, keep; else default to all
     if (shareSelection.size === 0) items.forEach(i => shareSelection.add(i.id));
     renderShareList(shareSearch ? shareSearch.value : '');
+    // sync aktiv tilstand på kvartal‑chips
+    if (shareQuartersEl) {
+      [...shareQuartersEl.querySelectorAll('.chip')].forEach(ch => {
+        if (selectedQuarters.has(ch.dataset.q)) ch.classList.add('active');
+        else ch.classList.remove('active');
+      });
+    }
   }
   btnShare.addEventListener('click', openShareModal);
   btnShareClose.addEventListener('click', closeShareModal);
   if (shareSearch) shareSearch.addEventListener('input', () => renderShareList(shareSearch.value));
   if (shareSelectAll) shareSelectAll.addEventListener('click', () => { items.forEach(i => shareSelection.add(i.id)); renderShareList(shareSearch ? shareSearch.value : ''); });
   if (shareSelectNone) shareSelectNone.addEventListener('click', () => { shareSelection.clear(); renderShareList(shareSearch ? shareSearch.value : ''); });
-  if (shareQuarters) {
-    shareQuarters.addEventListener('click', (e) => {
+  if (shareQuartersEl) {
+    shareQuartersEl.addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
       if (!chip) return;
       const q = chip.dataset.q;
