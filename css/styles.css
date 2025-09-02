@@ -15,7 +15,7 @@
 .sheet #shareList .meta { font-size:12px; opacity:.9; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
 .sheet #shareList .meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .sheet #shareList .meta-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
-.sheet #shareList .badge { height:20px; font-size:11px; padding:0 8px; }
+.sheet #shareList .badge { height:22px; font-size:11px; padding:0 8px; color:#eef7f6; }
 .sheet #shareList .group-title { margin-top:12px; font-weight:700; font-size:14px; color: rgba(255,255,255,0.96); }
 /* Globale stilregler og layout til Årshjul.  */
 :root {
@@ -420,19 +420,20 @@ svg {
 
 .item {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
-  transition: transform 200ms ease, box-shadow 220ms ease, background 220ms ease, border-color 220ms ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 200ms ease, border-color 200ms ease;
 }
 
 .item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.36), 0 0 0 1px rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.20), 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .item-content {
