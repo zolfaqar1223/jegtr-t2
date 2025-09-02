@@ -1,4 +1,4 @@
-/* Globale stilregler og layout til KMD Årshjul.  */
+/* Globale stilregler og layout til Årshjul.  */
 :root {
   --bg: #0F2F2E; /* Dark Teal */
   --panel: #0A1B2A; /* Midnight Navy */
@@ -6,7 +6,7 @@
   --text: #E6E6EB; /* Soft Platinum */
   --accent: #1F614E; /* Deep Emerald (brand accent/buttons) */
   --q1: #0F2F2E; /* Dark Teal */
-  --q2: #1F614E; /* Deep Emerald for KMD logo and ring */
+  --q2: #1F614E; /* Deep Emerald for logo and ring */
   --q3: #0A1B2A; /* Midnight Navy */
   --q4: #2C2C34; /* Charcoal Slate */
 }
@@ -49,7 +49,7 @@ header .logo {
   position: relative;
 }
 header .logo::after {
-  content: "KMD";
+  content: "";
   position: absolute;
   left: 12px;
   top: 5px;
