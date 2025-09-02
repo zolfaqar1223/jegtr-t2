@@ -519,9 +519,10 @@ document.addEventListener('DOMContentLoaded', () => {
   settings = readSettings();
   if (settings.activeCategory) activeCategory = settings.activeCategory;
   if (settings.activeStatus) activeStatus = settings.activeStatus;
-  if (settings.zoomLevel) zoomLevel = settings.zoomLevel;
-  if (typeof settings.panX === 'number') panX = settings.panX;
-  if (typeof settings.panY === 'number') panY = settings.panY;
+  // Start altid centreret og en tand zoomet ud ved første visning
+  zoomLevel = 0.9;
+  panX = 0;
+  panY = 0;
   if (typeof settings.activitiesExpanded === 'undefined') settings.activitiesExpanded = true;
   // setup UI
   initSelects();

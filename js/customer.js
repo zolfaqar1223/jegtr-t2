@@ -22,7 +22,7 @@ let currentIndex = -1;
 
 let items = [];
 let notes = {};
-let zoomLevel = 1;
+let zoomLevel = 0.9;
 let panX = 0;
 let panY = 0;
 let isPanMode = false;
