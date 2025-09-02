@@ -1,6 +1,6 @@
 // dashboard.js
 // Simple KPI dashboard using stored items/notes
-import { MONTHS, readItems, readNotes, STATUSES, CATS, readChangeLog } from './store.js';
+import { MONTHS, readItems, readNotes, STATUSES, CATS, CAT_COLORS, readChangeLog } from './store.js';
 
 function createTile(key, title, value, color) {
 	const el = document.createElement('div');
@@ -140,7 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Charts
 	renderStatusDonut(items);
-	renderCategoryBars(items);
+	renderCategoryPie(items);
+	renderCategoryList(items);
 	renderTrend(items);
 
 	// Risks and resources
@@ -180,39 +181,57 @@ function renderStatusDonut(items) {
 	});
 }
 
-function renderCategoryBars(items) {
-	const svg = document.getElementById('categoryBars');
-	if (!svg) return;
+// replaced old renderCategoryBars with premium pie + list
+function renderCategoryPie(items) {
+	const svg = document.getElementById('catPie');
+	const legend = document.getElementById('catLegend');
+	if (!svg || !legend) return;
 	svg.innerHTML = '';
-	const counts = CATS.map(c => ({ c, n: items.filter(i => i.cat === c).length }));
+	legend.innerHTML = '';
+	const cx = 100, cy = 100, r = 64, stroke = 28;
+	const counts = CATS.map(c => ({ c, n: items.filter(i => i.cat === c).length, color: CAT_COLORS[c] || 'var(--accent)' }));
+	const total = counts.reduce((a,b)=>a+b.n,0) || 1;
+	let start = -Math.PI/2;
+	counts.forEach(row => {
+		const angle = (row.n/total) * 2*Math.PI;
+		if (angle <= 0) return;
+		const end = start + angle;
+		const x1 = cx + r * Math.cos(start);
+		const y1 = cy + r * Math.sin(start);
+		const x2 = cx + r * Math.cos(end);
+		const y2 = cy + r * Math.sin(end);
+		const large = angle > Math.PI ? 1 : 0;
+		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		path.setAttribute('d', `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`);
+		path.setAttribute('stroke', row.color);
+		path.setAttribute('stroke-width', String(stroke));
+		path.setAttribute('fill', 'none');
+		path.setAttribute('opacity', '0.95');
+		svg.appendChild(path);
+		start = end;
+		const li = document.createElement('div');
+		li.className = 'legend-item';
+		const sw = document.createElement('span'); sw.className = 'swatch'; sw.style.background = row.color; li.appendChild(sw);
+		const txt = document.createElement('span'); txt.textContent = `${row.c} (${row.n})`; li.appendChild(txt);
+		legend.appendChild(li);
+	});
+}
+
+function renderCategoryList(items) {
+	const wrap = document.getElementById('catList');
+	if (!wrap) return;
+	wrap.innerHTML = '';
+	const counts = CATS.map(c => ({ c, n: items.filter(i => i.cat === c).length, color: CAT_COLORS[c] || 'var(--accent)' }));
 	const max = Math.max(1, ...counts.map(x => x.n));
-	const w = 320, h = 200, pad = 20, rowH = (h - pad*2) / counts.length;
-	counts.forEach((row, i) => {
-		const barW = ((w - pad*2) * (row.n / max));
-		const y = pad + i * rowH + 10;
-		const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-		bg.setAttribute('x', String(pad));
-		bg.setAttribute('y', String(y));
-		bg.setAttribute('width', String(w - pad*2));
-		bg.setAttribute('height', '12');
-		bg.setAttribute('rx', '5');
-		bg.setAttribute('fill', 'rgba(255,255,255,0.08)');
-		svg.appendChild(bg);
-		const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-		rect.setAttribute('x', String(pad));
-		rect.setAttribute('y', String(y));
-		rect.setAttribute('width', String(barW));
-		rect.setAttribute('height', '12');
-		rect.setAttribute('rx', '5');
-		rect.setAttribute('fill', 'var(--accent)');
-		svg.appendChild(rect);
-		const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-		label.setAttribute('x', String(pad));
-		label.setAttribute('y', String(y - 6));
-		label.setAttribute('fill', '#E6E6EB');
-		label.setAttribute('font-size', '10');
-		label.textContent = `${row.c} (${row.n})`;
-		svg.appendChild(label);
+	counts.forEach(row => {
+		const line = document.createElement('div');
+		line.className = 'row';
+		const meta = document.createElement('div'); meta.className = 'meta';
+		const catBadge = document.createElement('span'); catBadge.className = 'badge cat'; catBadge.style.borderColor = row.color; catBadge.style.color = row.color; catBadge.textContent = row.c; meta.appendChild(catBadge);
+		const num = document.createElement('strong'); num.textContent = String(row.n); num.style.fontSize = '16px'; num.style.minWidth = '24px'; meta.appendChild(num);
+		const bar = document.createElement('div'); bar.className = 'bar'; const fill = document.createElement('div'); fill.style.width = `${Math.round((row.n/max)*100)}%`; fill.style.background = row.color; bar.appendChild(fill);
+		line.appendChild(meta); line.appendChild(bar);
+		wrap.appendChild(line);
 	});
 }
 
