@@ -101,7 +101,18 @@
   <div class="modal" id="shareModal">
     <div class="sheet glass">
       <h2>Del med kunde</h2>
-      <p>Vælg hvordan du vil dele årshjulet med kunden.</p>
+      <p>Vælg hvilke aktiviteter der skal med i linket/visningen til kunden.</p>
+      <div style="display:grid;grid-template-columns: 1fr; gap: 8px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input id="shareSearch" placeholder="Søg titel, kategori, måned..." />
+          <span id="shareCount" style="font-size:12px;opacity:.85;"></span>
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <button class="ghost" id="shareSelectAll" style="padding:6px 10px;">Vælg alle</button>
+            <button class="ghost" id="shareSelectNone" style="padding:6px 10px;">Vælg ingen</button>
+          </div>
+        </div>
+        <div id="shareList" class="calendar-view" style="max-height: 280px; overflow:auto; padding:8px;"></div>
+      </div>
       <div class="modal-actions">
         <button id="btnSharePdf">Åbn kundevisning som PDF</button>
         <button class="ghost" id="btnShareLink">Åbn kundevisning</button>

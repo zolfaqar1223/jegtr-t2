@@ -203,6 +203,12 @@ textarea {
   font-family: inherit;
   font-size: 14px;
 }
+/* small inputs inside sheets/filters */
+.sheet input#shareSearch { width: 280px; }
+.sheet #shareList .share-row { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; }
+.sheet #shareList .share-row:hover { background: rgba(255,255,255,0.04); }
+.sheet #shareList .title { font-weight:600; font-size:13px; }
+.sheet #shareList .meta { font-size:12px; opacity:.85; }
 
 textarea {
   min-height: 100px;

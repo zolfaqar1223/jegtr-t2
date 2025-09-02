@@ -267,19 +267,87 @@ function setupShareModal() {
   const btnShareLink = document.getElementById('btnShareLink');
   const btnShareCopy = document.getElementById('btnShareCopy');
   if (!btnShare || !btnShareClose || !btnSharePdf || !btnShareLink) return; // Share UI findes ikke her
+  const shareList = document.getElementById('shareList');
+  const shareSearch = document.getElementById('shareSearch');
+  const shareCount = document.getElementById('shareCount');
+  const shareSelectAll = document.getElementById('shareSelectAll');
+  const shareSelectNone = document.getElementById('shareSelectNone');
+  let shareSelection = new Set();
+
+  function renderShareList(q = '') {
+    if (!shareList) return;
+    shareList.innerHTML = '';
+    const ql = q.trim().toLowerCase();
+    const data = items.slice().sort((a,b)=>{
+      const ma = MONTHS.indexOf(a.month), mb = MONTHS.indexOf(b.month);
+      if (ma !== mb) return ma - mb;
+      if (a.week !== b.week) return a.week - b.week;
+      return a.title.localeCompare(b.title);
+    }).filter(it => {
+      if (!ql) return true;
+      return (
+        (it.title||'').toLowerCase().includes(ql) ||
+        (it.cat||'').toLowerCase().includes(ql) ||
+        (it.month||'').toLowerCase().includes(ql) ||
+        (it.owner||'').toLowerCase().includes(ql)
+      );
+    });
+    data.forEach(it => {
+      const row = document.createElement('label');
+      row.className = 'share-row';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = shareSelection.has(it.id);
+      cb.addEventListener('change', () => {
+        if (cb.checked) shareSelection.add(it.id); else shareSelection.delete(it.id);
+        updateShareCount();
+      });
+      const body = document.createElement('div');
+      body.style.display = 'flex';
+      body.style.flexDirection = 'column';
+      const t = document.createElement('div');
+      t.className = 'title';
+      t.textContent = it.title;
+      const m = document.createElement('div');
+      m.className = 'meta';
+      m.textContent = `${it.month} · Uge ${it.week} · ${it.cat}${it.owner ? ' · ' + it.owner : ''}`;
+      body.appendChild(t);
+      body.appendChild(m);
+      row.appendChild(cb);
+      row.appendChild(body);
+      shareList.appendChild(row);
+    });
+    updateShareCount();
+  }
+  function updateShareCount() {
+    if (!shareCount) return;
+    const total = items.length;
+    const sel = shareSelection.size;
+    shareCount.textContent = sel === 0 ? 'Ingen valgt' : `${sel}/${total} valgt`;
+  }
+  function openShare() {
+    // preselect: if previous selection exists, keep; else default to all
+    if (shareSelection.size === 0) items.forEach(i => shareSelection.add(i.id));
+    renderShareList(shareSearch ? shareSearch.value : '');
+  }
   btnShare.addEventListener('click', openShareModal);
   btnShareClose.addEventListener('click', closeShareModal);
+  if (shareSearch) shareSearch.addEventListener('input', () => renderShareList(shareSearch.value));
+  if (shareSelectAll) shareSelectAll.addEventListener('click', () => { items.forEach(i => shareSelection.add(i.id)); renderShareList(shareSearch ? shareSearch.value : ''); });
+  if (shareSelectNone) shareSelectNone.addEventListener('click', () => { shareSelection.clear(); renderShareList(shareSearch ? shareSearch.value : ''); });
   // Brug sessionStorage til at overføre store datasæt (inkl. vedhæftede filer)
   btnSharePdf.addEventListener('click', () => {
     try {
-      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items, notes }));
+      const selected = items.filter(i => shareSelection.has(i.id));
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes }));
     } catch {}
     window.open('customer.html?session=1&print=1', '_blank');
     closeShareModal();
   });
   btnShareLink.addEventListener('click', () => {
     try {
-      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items, notes }));
+      const selected = items.filter(i => shareSelection.has(i.id));
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes }));
     } catch {}
     window.open('customer.html?session=1', '_blank');
     closeShareModal();
@@ -288,7 +356,8 @@ function setupShareModal() {
     btnShareCopy.addEventListener('click', async () => {
       // Lille link: fjerner base64-indhold fra vedhæftninger for at holde URL kort
       const light = (arr) => (arr||[]).map(it => ({ ...it, attachments: Array.isArray(it.attachments) ? it.attachments.map(a=>({ name:a.name })) : [] }));
-      const payload = { items: light(items), notes };
+      const selected = items.filter(i => shareSelection.has(i.id));
+      const payload = { items: light(selected), notes };
       const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
       const url = new URL(location.origin + location.pathname.replace('index.html','') + 'customer.html');
       // Brug hash fremfor querystring så servere ikke afviser pga. for lange URLs
@@ -300,6 +369,13 @@ function setupShareModal() {
         showToast('Kunne ikke kopiere link', 'error');
       }
     });
+  }
+  // When opening the modal, prepare selection list
+  function openShareModal() {
+    const m = document.getElementById('shareModal');
+    if (!m) return;
+    m.style.display = 'flex';
+    openShare();
   }
 }
 
