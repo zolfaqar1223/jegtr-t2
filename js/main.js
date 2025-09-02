@@ -6,6 +6,8 @@ import {
   MONTHS,
   CATS,
   STATUSES,
+  CAT_COLORS,
+  STATUS_COLORS,
   readItems,
   writeItems,
   readNotes,
@@ -292,30 +294,64 @@ function setupShareModal() {
         (it.owner||'').toLowerCase().includes(ql)
       );
     });
+    // group by month
+    const byMonth = new Map();
     data.forEach(it => {
-      const row = document.createElement('label');
-      row.className = 'share-row';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = shareSelection.has(it.id);
-      cb.addEventListener('change', () => {
-        if (cb.checked) shareSelection.add(it.id); else shareSelection.delete(it.id);
-        updateShareCount();
+      const list = byMonth.get(it.month) || [];
+      list.push(it);
+      byMonth.set(it.month, list);
+    });
+    MONTHS.forEach(m => {
+      const group = byMonth.get(m);
+      if (!group || group.length === 0) return;
+      const header = document.createElement('div');
+      header.className = 'group-title';
+      header.textContent = m;
+      header.style.marginTop = '10px';
+      shareList.appendChild(header);
+      group.forEach(it => {
+        const row = document.createElement('label');
+        row.className = 'share-row';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = shareSelection.has(it.id);
+        cb.addEventListener('change', () => {
+          if (cb.checked) shareSelection.add(it.id); else shareSelection.delete(it.id);
+          updateShareCount();
+        });
+        const body = document.createElement('div');
+        body.style.display = 'grid';
+        body.style.gridTemplateColumns = 'auto 1fr';
+        body.style.gap = '6px 10px';
+        const t = document.createElement('div');
+        t.className = 'title';
+        t.textContent = it.title;
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const cat = document.createElement('span');
+        cat.className = 'badge cat';
+        const c = CAT_COLORS[it.cat] || 'var(--accent)';
+        cat.style.borderColor = c;
+        cat.style.color = c;
+        cat.textContent = it.cat;
+        const status = document.createElement('span');
+        status.className = 'badge status';
+        const sc = STATUS_COLORS[it.status || 'Planlagt'] || '#999';
+        status.style.borderColor = sc;
+        status.style.color = sc;
+        status.textContent = it.status || 'Planlagt';
+        const details = document.createElement('span');
+        details.textContent = `Uge ${it.week}${it.owner ? ' · ' + it.owner : ''}`;
+        details.style.marginLeft = '8px';
+        meta.appendChild(cat);
+        meta.appendChild(status);
+        meta.appendChild(details);
+        body.appendChild(t);
+        body.appendChild(meta);
+        row.appendChild(cb);
+        row.appendChild(body);
+        shareList.appendChild(row);
       });
-      const body = document.createElement('div');
-      body.style.display = 'flex';
-      body.style.flexDirection = 'column';
-      const t = document.createElement('div');
-      t.className = 'title';
-      t.textContent = it.title;
-      const m = document.createElement('div');
-      m.className = 'meta';
-      m.textContent = `${it.month} · Uge ${it.week} · ${it.cat}${it.owner ? ' · ' + it.owner : ''}`;
-      body.appendChild(t);
-      body.appendChild(m);
-      row.appendChild(cb);
-      row.appendChild(body);
-      shareList.appendChild(row);
     });
     updateShareCount();
   }

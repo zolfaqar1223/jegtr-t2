@@ -208,7 +208,9 @@ textarea {
 .sheet #shareList .share-row { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; }
 .sheet #shareList .share-row:hover { background: rgba(255,255,255,0.04); }
 .sheet #shareList .title { font-weight:600; font-size:13px; }
-.sheet #shareList .meta { font-size:12px; opacity:.85; }
+.sheet #shareList .meta { font-size:12px; opacity:.9; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.sheet #shareList .badge { height:20px; font-size:11px; padding:0 8px; }
+.sheet #shareList .group-title { margin-top:12px; }
 
 textarea {
   min-height: 100px;
