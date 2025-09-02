@@ -73,6 +73,11 @@ button:hover {
 /* Unified card paddings and spacing */
 .card.glass { padding: 20px; border-radius: 18px; }
 .sheet.glass { padding: 20px; border-radius: 18px; }
+/* Premium modal tweaks */
+.modal .sheet.glass {
+  border-radius: 20px;
+  box-shadow: 0 26px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08);
+}
 .item.glass { padding: 12px 14px; border-radius: 16px; }
 
 /* Badges */

@@ -102,20 +102,23 @@
     <div class="sheet glass">
       <h2>Del med kunde</h2>
       <p>Vælg hvilke aktiviteter der skal med i linket/visningen til kunden.</p>
-      <div style="display:grid;grid-template-columns: 1fr; gap: 8px;">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input id="shareSearch" placeholder="Søg titel, kategori, måned..." />
-          <span id="shareCount" style="font-size:12px;opacity:.85;"></span>
-          <div style="margin-left:auto; display:flex; gap:6px;">
-            <button class="ghost" id="shareSelectAll" style="padding:6px 10px;">Vælg alle</button>
-            <button class="ghost" id="shareSelectNone" style="padding:6px 10px;">Vælg ingen</button>
+      <div class="share-grid">
+        <div class="share-toolbar">
+          <div class="search-wrap">
+            <span class="search-icon" aria-hidden="true">🔎</span>
+            <input id="shareSearch" placeholder="Søg titel, kategori, måned..." />
+          </div>
+          <span id="shareCount" class="share-count"></span>
+          <div class="bulk-actions">
+            <button class="ghost" id="shareSelectAll">Vælg alle</button>
+            <button class="ghost" id="shareSelectNone">Vælg ingen</button>
           </div>
         </div>
-        <div id="shareList" class="calendar-view" style="max-height: 280px; overflow:auto; padding:8px;"></div>
+        <div id="shareList" class="calendar-view"></div>
       </div>
       <div class="modal-actions">
-        <button id="btnSharePdf">Åbn kundevisning som PDF</button>
-        <button class="ghost" id="btnShareLink">Åbn kundevisning</button>
+        <button id="btnShareLink">Åbn kundevisning</button>
+        <button class="ghost" id="btnSharePdf">Åbn som PDF</button>
         <button class="ghost" id="btnShareCopy">Kopier link</button>
         <button class="ghost" id="btnShareClose">Luk</button>
       </div>
