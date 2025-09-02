@@ -22,6 +22,7 @@ let currentIndex = -1;
 
 let items = [];
 let notes = {};
+let highlightMonths = [];
 let zoomLevel = 0.9;
 let panX = 0;
 let panY = 0;
@@ -179,7 +180,7 @@ function render(focusedMonth = null) {
     moveItemToMonth: () => {},
     moveItemToMonthWeek: () => {}
   };
-  drawWheel(wheelSvg, items, callbacks, { focusedMonth });
+  drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths });
   // Apply zoom on customer wheel similar to main
   clampPanCustomer();
   wheelSvg.style.transformOrigin = '50% 50%';
@@ -221,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed.items)) items = parsed.items;
         if (parsed.notes && typeof parsed.notes === 'object') notes = parsed.notes;
+        if (Array.isArray(parsed.highlightMonths)) highlightMonths = parsed.highlightMonths;
       } else {
         items = readItems();
         notes = readNotes();
@@ -234,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(dataParam)))));
       if (Array.isArray(decoded.items)) items = decoded.items;
       if (decoded.notes && typeof decoded.notes === 'object') notes = decoded.notes;
+      if (Array.isArray(decoded.highlightMonths)) highlightMonths = decoded.highlightMonths;
     } catch (e) {
       items = readItems();
       notes = readNotes();

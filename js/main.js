@@ -278,7 +278,9 @@ function setupShareModal() {
   const shareCount = document.getElementById('shareCount');
   const shareSelectAll = document.getElementById('shareSelectAll');
   const shareSelectNone = document.getElementById('shareSelectNone');
+  const shareQuarters = document.getElementById('shareQuarters');
   let shareSelection = new Set();
+  let selectedQuarters = new Set();
 
   function renderShareList(q = '') {
     if (!shareList) return;
@@ -383,11 +385,30 @@ function setupShareModal() {
   if (shareSearch) shareSearch.addEventListener('input', () => renderShareList(shareSearch.value));
   if (shareSelectAll) shareSelectAll.addEventListener('click', () => { items.forEach(i => shareSelection.add(i.id)); renderShareList(shareSearch ? shareSearch.value : ''); });
   if (shareSelectNone) shareSelectNone.addEventListener('click', () => { shareSelection.clear(); renderShareList(shareSearch ? shareSearch.value : ''); });
+  if (shareQuarters) {
+    shareQuarters.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      const q = chip.dataset.q;
+      if (!q) return;
+      if (selectedQuarters.has(q)) { selectedQuarters.delete(q); chip.classList.remove('active'); }
+      else { selectedQuarters.add(q); chip.classList.add('active'); }
+      // When quarters selected, filter selection to items within any selected quarter
+      if (selectedQuarters.size > 0) {
+        shareSelection.clear();
+        const qToMonths = { Q1: ['Januar','Februar','Marts'], Q2: ['April','Maj','Juni'], Q3: ['Juli','August','September'], Q4: ['Oktober','November','December'] };
+        const allowed = new Set([].concat(...[...selectedQuarters].map(q => qToMonths[q] || [])));
+        items.forEach(i => { if (allowed.has(i.month)) shareSelection.add(i.id); });
+      }
+      renderShareList(shareSearch ? shareSearch.value : '');
+    });
+  }
   // Brug sessionStorage til at overføre store datasæt (inkl. vedhæftede filer)
   btnSharePdf.addEventListener('click', () => {
     try {
       const selected = items.filter(i => shareSelection.has(i.id));
-      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes }));
+      const highlightMonths = computeHighlightMonths(selectedQuarters);
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes, highlightMonths }));
     } catch {}
     window.open('customer.html?session=1&print=1', '_blank');
     closeShareModal();
@@ -395,7 +416,8 @@ function setupShareModal() {
   btnShareLink.addEventListener('click', () => {
     try {
       const selected = items.filter(i => shareSelection.has(i.id));
-      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes }));
+      const highlightMonths = computeHighlightMonths(selectedQuarters);
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items: selected, notes, highlightMonths }));
     } catch {}
     window.open('customer.html?session=1', '_blank');
     closeShareModal();
@@ -405,7 +427,8 @@ function setupShareModal() {
       // Lille link: fjerner base64-indhold fra vedhæftninger for at holde URL kort
       const light = (arr) => (arr||[]).map(it => ({ ...it, attachments: Array.isArray(it.attachments) ? it.attachments.map(a=>({ name:a.name })) : [] }));
       const selected = items.filter(i => shareSelection.has(i.id));
-      const payload = { items: light(selected), notes };
+      const highlightMonths = computeHighlightMonths(selectedQuarters);
+      const payload = { items: light(selected), notes, highlightMonths };
       const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
       const url = new URL(location.origin + location.pathname.replace('index.html','') + 'customer.html');
       // Brug hash fremfor querystring så servere ikke afviser pga. for lange URLs
@@ -424,6 +447,11 @@ function setupShareModal() {
     if (!m) return;
     m.style.display = 'flex';
     openShare();
+  }
+
+  function computeHighlightMonths(qSet) {
+    const qToMonths = { Q1: ['Januar','Februar','Marts'], Q2: ['April','Maj','Juni'], Q3: ['Juli','August','September'], Q4: ['Oktober','November','December'] };
+    return [...qSet].flatMap(q => qToMonths[q] || []);
   }
 }
 

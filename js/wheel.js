@@ -16,7 +16,8 @@ import { polar, segPath } from './utils.js';
  *   - moveItemToMonth(id, monthName)
  *   - moveItemToMonthWeek(id, monthName, weekNumber)
  */
-export function drawWheel(svg, items, callbacks) {
+export function drawWheel(svg, items, callbacks, opts = {}) {
+  const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
   console.log('[YearWheel TEST] drawWheel kaldt, antal items =', Array.isArray(items) ? items.length : 'ukendt');
   // Ryd tidligere indhold
@@ -92,7 +93,12 @@ export function drawWheel(svg, items, callbacks) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', segPath(cx, cy, rQuarterOuter, rMonthOuter, a1, a2));
     path.setAttribute('fill', `var(--q${qIndex + 1})`);
-    path.setAttribute('opacity', '0.3');
+    const isHl = highlightMonths.includes(MONTHS[m]);
+    path.setAttribute('opacity', isHl ? '0.55' : '0.25');
+    if (isHl) {
+      path.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+      path.setAttribute('stroke-width', '1');
+    }
     path.style.cursor = 'pointer';
     path.classList.add('month-seg');
     path.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
@@ -111,7 +117,8 @@ export function drawWheel(svg, items, callbacks) {
       p.setAttribute('d', segPath(cx, cy, rIn, rOut, a1, a2));
       p.setAttribute('fill', 'var(--accent)');
       const op = 0.2 + Math.min(count, 3) * 0.15;
-      p.setAttribute('opacity', String(Math.min(op, 0.6)));
+      const baseOp = Math.min(op, 0.6);
+      p.setAttribute('opacity', String(isHl ? Math.min(0.85, baseOp + 0.2) : baseOp));
       p.style.cursor = 'pointer';
       p.classList.add('month-seg');
       p.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
@@ -128,6 +135,7 @@ export function drawWheel(svg, items, callbacks) {
     txt.setAttribute('fill', '#ffffff');
     txt.textContent = MONTHS[m];
     txt.style.cursor = 'pointer';
+    if (isHl) txt.setAttribute('font-weight', '700');
     txt.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
     svg.appendChild(txt);
   }
