@@ -578,6 +578,25 @@ body.customer #listSection { grid-area: acts; }
   color: #cfe8e4;
 }
 
+/* Compact filter widget (customer view) */
+.customer .customer-filter-widget {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  z-index: 50;
+}
+.customer .customer-filter-widget label { font-size: 12px; opacity: .9; margin: 0; }
+.customer .customer-filter-widget select { width: auto; min-width: 120px; padding: 6px 8px; }
+
 @media print {
   header,
   .chips,
@@ -590,6 +609,7 @@ body.customer #listSection { grid-area: acts; }
   textarea {
     display: none !important;
   }
+  .customer-filter-widget { display: none !important; }
   .wrap {
     grid-template-columns: 1fr;
     padding: 0;

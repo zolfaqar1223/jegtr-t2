@@ -15,15 +15,16 @@
       <button id="btnPrintCustomer">Download PDF</button>
     </div>
   </header>
+  <div id="customerFilterWidget" class="customer-filter-widget glass">
+    <label for="custFilterCat" style="font-size:12px;opacity:.9;">Filter</label>
+    <select id="custFilterCat"></select>
+    <select id="custFilterStatus"></select>
+  </div>
   <main class="wrap">
     <section class="card glass" id="nextSection" style="grid-column: 1 / -1;">
       <h3>Næste aktivitet</h3>
       <div id="nextBox" class="item glass"></div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
-        <label for="custFilterCat" style="font-size:12px;opacity:.9;">Filter</label>
-        <select id="custFilterCat"></select>
-        <select id="custFilterStatus"></select>
-      </div>
+      
     </section>
     <section class="card glass wheel-wrap resizable">
       <h3>Årshjul</h3>
