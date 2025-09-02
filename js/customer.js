@@ -8,7 +8,7 @@ const listContainer = document.getElementById('list');
 const nextBox = document.getElementById('nextBox');
 const filterCat = document.getElementById('custFilterCat');
 const filterStatus = document.getElementById('custFilterStatus');
-const monthNotesList = document.getElementById('monthNotesList');
+// Fjernet månedsnoter fra kundevisning
 const seeAllBtn = document.getElementById('seeAllCustomer');
 const viewerModal = document.getElementById('viewerModal');
 const viewerTitle = document.getElementById('viewerTitle');
@@ -111,36 +111,7 @@ function groupByMonth(arr) {
                .filter(g => g.items.length);
 }
 
-function renderMonthNotes(listEl) {
-  if (!listEl) return;
-  listEl.innerHTML = '';
-  const monthsWithNotes = Object.keys(notes || {}).filter(k => (notes[k] || '').trim().length > 0);
-  if (monthsWithNotes.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'item glass';
-    empty.textContent = 'Ingen månedsnoter';
-    listEl.appendChild(empty);
-    return;
-  }
-  monthsWithNotes.forEach(m => {
-    const el = document.createElement('div');
-    el.className = 'item glass';
-    el.style.flexDirection = 'column';
-    el.style.gap = '6px';
-    const title = document.createElement('strong');
-    title.textContent = m;
-    const n = document.createElement('div');
-    n.className = 'note';
-    n.textContent = notes[m];
-    el.appendChild(title);
-    el.appendChild(n);
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => {
-      openViewer({ title: `Månedsnoter · ${m}`, month: m, cat: '', note: notes[m] || '' });
-    });
-    listEl.appendChild(el);
-  });
-}
+// renderMonthNotes fjernet i kundevisning
 
 function openViewer(item) {
   if (!viewerModal) return;
@@ -207,7 +178,7 @@ function render(focusedMonth = null) {
   wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`.replace('{panX}', panX).replace('{panY}', panY);
   const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
-  renderMonthNotes(monthNotesList);
+  // Månedsnoter vises ikke i kundevisning
   // Collapsible activities (customer view)
   const aToggle = document.getElementById('activitiesToggle');
   const listEl = document.getElementById('list');
