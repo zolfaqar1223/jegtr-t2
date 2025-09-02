@@ -60,10 +60,11 @@ function renderListReadOnly(listEl, itemsToShow) {
       const color = CAT_COLORS[it.cat] || 'var(--accent)';
       const badge = `<span class=\"badge cat\" style=\"background:rgba(255,255,255,0.06);border-color:${color};color:${color};margin-right:10px;\">${it.cat}</span>`;
       const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : new Date().toLocaleDateString('da-DK');
-      meta.innerHTML = `${badge}${it.month} · ${dateStr}`;
+      const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
+      meta.innerHTML = `${badge}${it.month}${weekStr} · ${dateStr}`;
       const note = document.createElement('div');
       note.className = 'note';
-      note.textContent = it.note || '';
+      note.textContent = (it.note && it.note.trim().length) ? it.note : 'Ingen noter tilføjet endnu';
       // attachments
       const attach = document.createElement('div');
       attach.className = 'attachments';
@@ -91,6 +92,13 @@ function renderListReadOnly(listEl, itemsToShow) {
           row.appendChild(dl);
           attach.appendChild(row);
         });
+      }
+      // Attachment count badge
+      if (it.attachments && it.attachments.length) {
+        const cnt = document.createElement('span');
+        cnt.className = 'badge tag';
+        cnt.textContent = `${it.attachments.length} fil${it.attachments.length>1?'er':''}`;
+        meta.appendChild(cnt);
       }
       content.appendChild(title);
       content.appendChild(meta);
@@ -358,5 +366,9 @@ function renderNext(arr) {
   const it = (idx && idx.i) || arr[0];
   nextBox.className = 'item glass';
   const color = CAT_COLORS[it.cat] || 'var(--accent)';
-  nextBox.innerHTML = `<div class=\"item-content\"><strong>${it.title}</strong><div class=\"meta\"><span class=\"badge cat\" style=\"border-color:${color};color:${color};\">${it.cat}</span> ${it.month} · Uge ${it.week}</div>${it.note?`<div class=\"note\">${it.note}</div>`:''}</div>`;
+  const weekStr = it.isoWeek ? `Uge ${it.isoWeek}` : `Uge ${it.week}`;
+  const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+  const noteText = (it.note && it.note.trim().length) ? it.note : 'Ingen noter tilføjet endnu';
+  const attachCnt = (it.attachments && it.attachments.length) ? `<span class=\"badge tag\">${it.attachments.length} fil${it.attachments.length>1?'er':''}</span>` : '';
+  nextBox.innerHTML = `<div class=\"item-content\"><strong>${it.title}</strong><div class=\"meta\"><span class=\"badge cat\" style=\"border-color:${color};color:${color};\">${it.cat}</span> ${it.month} · ${weekStr} · ${dateStr} ${attachCnt}</div><div class=\"note\">${noteText}</div></div>`;
 }

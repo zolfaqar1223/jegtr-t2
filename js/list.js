@@ -39,12 +39,23 @@ export function renderList(listEl, items, callbacks) {
     statusBadge.style.background = sColor;
     statusBadge.style.borderColor = sColor;
     statusBadge.textContent = it.status || 'Planlagt';
+    // Missing owner badge
+    if (!it.owner || String(it.owner).trim() === '') {
+      const unassigned = document.createElement('span');
+      unassigned.className = 'badge tag';
+      unassigned.textContent = 'Ikke tildelt';
+      unassigned.style.borderColor = 'rgba(255,255,255,0.28)';
+      unassigned.style.color = '#cfe8e4';
+      meta.appendChild(unassigned);
+    }
     meta.innerHTML = '';
     meta.appendChild(badge);
     meta.appendChild(statusBadge);
     const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+    const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
+    const qy = it.quarter && it.year ? ` · ${it.quarter} · ${it.year}` : '';
     const owner = it.owner ? ` · Ansvarlig: ${it.owner}` : '';
-    meta.append(` ${it.month} · ${dateStr}${owner}`);
+    meta.append(` ${it.month}${weekStr} · ${dateStr}${qy}${owner}`);
 
     // Inline details (hidden by default)
     const details = document.createElement('div');

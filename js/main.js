@@ -17,6 +17,7 @@ import {
   generateId,
   logChange
 } from './store.js';
+import { getIsoWeek } from './utils.js';
 import { renderList } from './list.js';
 import { drawWheel } from './wheel.js';
 import { openModal } from './modal.js';
@@ -155,6 +156,9 @@ async function saveItem() {
   const month = MONTHS[baseDate.getMonth()];
   const day = baseDate.getDate();
   const week = Math.max(1, Math.min(5, Math.ceil(day / 7)));
+  const isoWeek = getIsoWeek(baseDate);
+  const year = baseDate.getFullYear();
+  const quarter = `Q${Math.floor(baseDate.getMonth() / 3) + 1}`;
   const title = titleInput.value.trim();
   const owner = ownerInput ? ownerInput.value.trim() : '';
   const cat = categorySelect.value;
@@ -189,7 +193,7 @@ async function saveItem() {
       } else {
         attachments = Array.isArray(items[idx].attachments) ? items[idx].attachments : [];
       }
-      items[idx] = { ...items[idx], month, week, title, owner, cat, status, note, date: savedDateIso, attachments };
+      items[idx] = { ...items[idx], month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, attachments, updatedAt: new Date().toISOString() };
       const after = { ...items[idx] };
       logChange(`Redigerede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'edit', id: editingId, before, after });
     }
@@ -200,7 +204,7 @@ async function saveItem() {
       const fileList = Array.from(filesInput.files);
       attachments = await readFilesAsDataUrls(fileList);
     }
-    const item = { id, month, week, title, owner, cat, status, note, date: savedDateIso, attachments };
+    const item = { id, month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, attachments, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: (settings && settings.user) || 'System' };
     items.push(item);
     logChange(`Tilføjede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'create', id, after: item });
   }
