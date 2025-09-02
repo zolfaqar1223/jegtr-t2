@@ -1,0 +1,3 @@
+[33m87f4049[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove 'Kommende uger'; make 'Aktiviteter' collapsible; make panels resizable via CSS resize
+[33mb5290fa[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Premium feel: stronger glass blur and softer shadows; more spacing on cards/items; hover elevation
+[33m728e6f4[m Stabilize add flow: remove leftover monthSelect usage; rely solely on date; ensure collapsible upcoming; push

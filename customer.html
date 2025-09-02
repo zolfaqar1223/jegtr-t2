@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kundevisning · KMD Årshjul</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/glass.css" />
+</head>
+<body class="customer">
+  <header class="glass">
+    <span class="logo" aria-label="KMD"></span>
+    <h1>Kundevisning</h1>
+    <div class="right">
+      <button id="btnPrintCustomer">Download PDF</button>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="card glass" id="nextSection" style="grid-column: 1 / -1;">
+      <h3>Næste aktivitet</h3>
+      <div id="nextBox" class="item glass"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+        <label for="custFilterCat" style="font-size:12px;opacity:.9;">Filter</label>
+        <select id="custFilterCat"></select>
+        <select id="custFilterStatus"></select>
+      </div>
+    </section>
+    <section class="card glass wheel-wrap resizable">
+      <h3>Årshjul</h3>
+      <svg id="wheel" viewBox="0 0 700 700" aria-label="Årshjul"></svg>
+    </section>
+    <section class="card glass resizable" id="listSection">
+      <h3>Aktiviteter</h3>
+      <div id="list" class="list"></div>
+      <h3 style="margin-top:10px;">Månedsnoter</h3>
+      <div id="monthNotesList" class="list"></div>
+    </section>
+    <!-- Read-only viewer modal -->
+    <div class="viewer-modal" id="viewerModal">
+      <div class="viewer-sheet glass">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <button class="ghost" id="viewerPrev" aria-label="Forrige">◂</button>
+          <h3 id="viewerTitle" style="margin:0; text-align:center; flex:1 1 auto;"></h3>
+          <button class="ghost" id="viewerNext" aria-label="Næste">▸</button>
+        </div>
+        <div class="viewer-meta" id="viewerMeta"></div>
+        <div class="viewer-note" id="viewerNote"></div>
+        <div class="viewer-attachments" id="viewerAttach"></div>
+        <div class="viewer-actions">
+          <button class="ghost" id="viewerClose">Luk</button>
+        </div>
+      </div>
+    </div>
+    <!-- Week items modal (read-only list) -->
+    <div class="viewer-modal" id="weekModal">
+      <div class="viewer-sheet glass">
+        <h3 id="weekTitle"></h3>
+        <div id="weekList" class="list"></div>
+        <div class="viewer-actions">
+          <button class="ghost" id="weekClose">Luk</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script defer src="js/particles.js"></script>
+  <script type="module" src="js/customer.js"></script>
+</body>
+</html>
