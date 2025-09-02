@@ -228,8 +228,29 @@ function clampPanCustomer() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(location.search);
-  const dataParam = params.get('data');
-  if (dataParam) {
+  let dataParam = params.get('data');
+  // Fald tilbage til hash-baseret data (#data=...) for at undgå for lange querystrings
+  if (!dataParam && location.hash && location.hash.startsWith('#')) {
+    const hashParams = new URLSearchParams(location.hash.slice(1));
+    dataParam = hashParams.get('data');
+  }
+  const useSession = params.get('session') === '1';
+  if (useSession) {
+    try {
+      const raw = sessionStorage.getItem('aarshjul.customer.data');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.items)) items = parsed.items;
+        if (parsed.notes && typeof parsed.notes === 'object') notes = parsed.notes;
+      } else {
+        items = readItems();
+        notes = readNotes();
+      }
+    } catch {
+      items = readItems();
+      notes = readNotes();
+    }
+  } else if (dataParam) {
     try {
       const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(dataParam)))));
       if (Array.isArray(decoded.items)) items = decoded.items;

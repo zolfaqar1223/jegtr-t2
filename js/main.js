@@ -269,21 +269,30 @@ function setupShareModal() {
   if (!btnShare || !btnShareClose || !btnSharePdf || !btnShareLink) return; // Share UI findes ikke her
   btnShare.addEventListener('click', openShareModal);
   btnShareClose.addEventListener('click', closeShareModal);
+  // Brug sessionStorage til at overføre store datasæt (inkl. vedhæftede filer)
   btnSharePdf.addEventListener('click', () => {
-    const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({ items, notes })))));
-    window.open(`customer.html?data=${data}&print=1`, '_blank');
+    try {
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items, notes }));
+    } catch {}
+    window.open('customer.html?session=1&print=1', '_blank');
     closeShareModal();
   });
   btnShareLink.addEventListener('click', () => {
-    const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({ items, notes })))));
-    window.open(`customer.html?data=${data}`, '_blank');
+    try {
+      sessionStorage.setItem('aarshjul.customer.data', JSON.stringify({ items, notes }));
+    } catch {}
+    window.open('customer.html?session=1', '_blank');
     closeShareModal();
   });
   if (btnShareCopy) {
     btnShareCopy.addEventListener('click', async () => {
-      const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({ items, notes })))));
+      // Lille link: fjerner base64-indhold fra vedhæftninger for at holde URL kort
+      const light = (arr) => (arr||[]).map(it => ({ ...it, attachments: Array.isArray(it.attachments) ? it.attachments.map(a=>({ name:a.name })) : [] }));
+      const payload = { items: light(items), notes };
+      const data = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
       const url = new URL(location.origin + location.pathname.replace('index.html','') + 'customer.html');
-      url.searchParams.set('data', data);
+      // Brug hash fremfor querystring så servere ikke afviser pga. for lange URLs
+      url.hash = 'data=' + data;
       try {
         await navigator.clipboard.writeText(url.toString());
         showToast('Link kopieret', 'success');
