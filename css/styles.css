@@ -223,14 +223,18 @@ textarea {
 }
 
 .chip {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.22);
-  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: var(--text);
   cursor: pointer;
   user-select: none;
-  color: rgba(255,255,255,0.96);
 }
 
 .chip:hover {
