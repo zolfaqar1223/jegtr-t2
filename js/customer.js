@@ -69,8 +69,27 @@ function renderListReadOnly(listEl, itemsToShow) {
       attach.className = 'attachments';
       if (it.attachments && it.attachments.length) {
         it.attachments.forEach(a => {
-          const link = document.createElement('a'); link.className = 'attach-chip'; link.textContent = a.name; if (a.dataUrl) { link.href = a.dataUrl; link.download = a.name; } else { link.href = '#'; }
-          attach.appendChild(link);
+          const row = document.createElement('div');
+          row.style.display = 'inline-flex';
+          row.style.gap = '6px';
+          row.style.alignItems = 'center';
+          const nameChip = document.createElement('span');
+          nameChip.className = 'attach-chip';
+          nameChip.textContent = a.name;
+          const dl = document.createElement('a');
+          dl.className = 'attach-chip';
+          dl.textContent = 'Hent fil';
+          if (a.dataUrl) {
+            dl.href = a.dataUrl;
+            dl.download = a.name;
+          } else {
+            dl.href = '#';
+            dl.addEventListener('click', (e) => { e.preventDefault(); });
+            dl.title = 'Fil ikke tilgængelig';
+          }
+          row.appendChild(nameChip);
+          row.appendChild(dl);
+          attach.appendChild(row);
         });
       }
       content.appendChild(title);
@@ -134,16 +153,27 @@ function openViewer(item) {
     viewerAttach.innerHTML = '';
     if (item.attachments && item.attachments.length) {
       item.attachments.forEach(a => {
-        const chip = document.createElement('a');
-        chip.className = 'attach-chip';
-        chip.textContent = a.name;
+        const row = document.createElement('div');
+        row.style.display = 'inline-flex';
+        row.style.gap = '6px';
+        row.style.alignItems = 'center';
+        const nameChip = document.createElement('span');
+        nameChip.className = 'attach-chip';
+        nameChip.textContent = a.name;
+        const dl = document.createElement('a');
+        dl.className = 'attach-chip';
+        dl.textContent = 'Hent fil';
         if (a.dataUrl) {
-          chip.href = a.dataUrl;
-          chip.download = a.name;
+          dl.href = a.dataUrl;
+          dl.download = a.name;
         } else {
-          chip.href = '#';
+          dl.href = '#';
+          dl.addEventListener('click', (e) => { e.preventDefault(); });
+          dl.title = 'Fil ikke tilgængelig';
         }
-        viewerAttach.appendChild(chip);
+        row.appendChild(nameChip);
+        row.appendChild(dl);
+        viewerAttach.appendChild(row);
       });
     }
   }

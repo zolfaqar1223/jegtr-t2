@@ -147,7 +147,7 @@ function resetForm() {
   if (dateInput) dateInput.value = '';
 }
 
-function saveItem() {
+async function saveItem() {
   // Udled måned/uge ud fra valgt dato eller brug dags dato
   const baseDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : new Date();
   const month = MONTHS[baseDate.getMonth()];
@@ -159,12 +159,20 @@ function saveItem() {
   const status = (statusSelect && statusSelect.value) || 'Planlagt';
   const note = notesInput.value.trim();
   const savedDateIso = baseDate.toISOString();
-  // attachments: read files as base64 array (name + data)
-  let attachments = [];
-  if (filesInput && filesInput.files && filesInput.files.length > 0) {
-    const fileList = Array.from(filesInput.files);
-    attachments = fileList.map(f => ({ name: f.name }));
+  // attachments: læs filer som dataURL, ellers bevar eksisterende ved redigering
+  async function readFilesAsDataUrls(list) {
+    const toDataUrl = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({ name: file.name, type: file.type || '', size: file.size || 0, dataUrl: reader.result });
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const results = await Promise.all(list.map(toDataUrl));
+    return results;
   }
+
+  let attachments = [];
+  const hasNewFiles = filesInput && filesInput.files && filesInput.files.length > 0;
   if (!title) {
     alert('Skriv en aktivitetstitel');
     return;
@@ -173,6 +181,12 @@ function saveItem() {
     const idx = items.findIndex(x => x.id === editingId);
     if (idx > -1) {
       const before = { ...items[idx] };
+      if (hasNewFiles) {
+        const fileList = Array.from(filesInput.files);
+        attachments = await readFilesAsDataUrls(fileList);
+      } else {
+        attachments = Array.isArray(items[idx].attachments) ? items[idx].attachments : [];
+      }
       items[idx] = { ...items[idx], month, week, title, owner, cat, status, note, date: savedDateIso, attachments };
       const after = { ...items[idx] };
       logChange(`Redigerede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'edit', id: editingId, before, after });
@@ -180,6 +194,10 @@ function saveItem() {
     editingId = null;
   } else {
     const id = generateId();
+    if (hasNewFiles) {
+      const fileList = Array.from(filesInput.files);
+      attachments = await readFilesAsDataUrls(fileList);
+    }
     const item = { id, month, week, title, owner, cat, status, note, date: savedDateIso, attachments };
     items.push(item);
     logChange(`Tilføjede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'create', id, after: item });

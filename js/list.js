@@ -60,11 +60,20 @@ export function renderList(listEl, items, callbacks) {
       const files = document.createElement('div');
       files.className = 'attachments';
       it.attachments.forEach(a => {
-        const link = document.createElement('a');
-        link.textContent = a.name;
-        link.className = 'attach-chip';
-        if (a.dataUrl) { link.href = a.dataUrl; link.download = a.name; } else { link.href = '#'; }
-        files.appendChild(link);
+        const row = document.createElement('div');
+        row.style.display = 'inline-flex';
+        row.style.gap = '6px';
+        row.style.alignItems = 'center';
+        const nameChip = document.createElement('span');
+        nameChip.className = 'attach-chip';
+        nameChip.textContent = a.name;
+        const dl = document.createElement('a');
+        dl.className = 'attach-chip';
+        dl.textContent = 'Hent fil';
+        if (a.dataUrl) { dl.href = a.dataUrl; dl.download = a.name; } else { dl.href = '#'; dl.addEventListener('click', e => e.preventDefault()); dl.title = 'Fil ikke tilgængelig'; }
+        row.appendChild(nameChip);
+        row.appendChild(dl);
+        files.appendChild(row);
       });
       details.appendChild(files);
     }
