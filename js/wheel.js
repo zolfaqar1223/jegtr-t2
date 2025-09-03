@@ -21,7 +21,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   const restrictMonths = Boolean(opts.restrictMonths);
   const showBubbles = false; // safety gate to ensure stable wheel render
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
-  console.log('[YearWheel TEST] drawWheel kaldt, antal items =', Array.isArray(items) ? items.length : 'ukendt');
+  try { console.debug('[YearWheel] draw', Array.isArray(items) ? items.length : 'ukendt'); } catch {}
   // Ryd tidligere indhold
   svg.innerHTML = '';
   if (showBubbles) {
