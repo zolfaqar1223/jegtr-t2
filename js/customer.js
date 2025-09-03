@@ -181,8 +181,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    const restrict = Array.isArray(highlightMonths) && highlightMonths.length > 0;
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: restrict });
+    // Rollback to stable: render full wheel (no restrict), optional focus only
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
@@ -201,9 +201,7 @@ function render(focusedMonth = null) {
   clampPanCustomer();
   wheelSvg.style.transformOrigin = '50% 50%';
   wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`.replace('{panX}', panX).replace('{panY}', panY);
-  const listItems = (highlightMonths && highlightMonths.length)
-    ? items.filter(x => highlightMonths.includes(x.month))
-    : (focusedMonth ? items.filter(x => x.month === focusedMonth) : items);
+  const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning
   // Collapsible activities (customer view)
@@ -283,8 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
     filterCat.addEventListener('change', applyFilters);
     filterStatus.addEventListener('change', applyFilters);
   }
-  // render next box
-  renderNext(listItems);
+  // render next box (use all items for upcoming)
+  renderNext(items);
   // Add zoom controls on customer view
   const wrap = document.querySelector('.wheel-wrap');
   if (wrap && !wrap.querySelector('.zoom-controls')) {
