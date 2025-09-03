@@ -284,11 +284,14 @@ function setupShareModal() {
 
   function ensureQuarterChips() {
     if (shareQuartersEl) return shareQuartersEl;
-    if (!shareList || !shareList.parentElement) return null;
-    const host = shareList.parentElement;
+    // Place chips inside toolbar if present; else before the list
+    const container = shareList && shareList.parentElement;
+    if (!container) return null;
+    const toolbar = container.querySelector('.share-toolbar') || container;
     const row = document.createElement('div');
     row.id = 'shareQuarters';
     row.className = 'chips';
+    row.style.marginLeft = '8px';
     ['Q1','Q2','Q3','Q4'].forEach(q => {
       const s = document.createElement('span');
       s.className = 'chip glow';
@@ -296,7 +299,8 @@ function setupShareModal() {
       s.textContent = q;
       row.appendChild(s);
     });
-    host.insertBefore(row, shareList);
+    // Append to toolbar, after search and count
+    toolbar.appendChild(row);
     shareQuartersEl = row;
     return shareQuartersEl;
   }

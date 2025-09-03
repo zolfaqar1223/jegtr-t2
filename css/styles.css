@@ -5,6 +5,7 @@
 .search-wrap .search-icon { position:absolute; left:8px; opacity:.85; font-size: 14px; }
 .share-count { font-size:12px; opacity:.85; }
 .bulk-actions { margin-left:auto; display:flex; gap:6px; }
+.share-toolbar + #shareQuarters, .share-toolbar .chips { margin-top: 4px; }
 
 /* Share list layout: checkbox left, content right */
 .sheet #shareList { max-height: 320px; overflow:auto; padding:8px; }
