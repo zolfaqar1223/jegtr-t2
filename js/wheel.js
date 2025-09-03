@@ -227,7 +227,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       const [bx, by] = polar(cx, cy, (rMonthOuter + rWeekOuter) / 2, mid);
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.classList.add('marker');
-      if (useHighlight && !isHl) {
+      const isWeekHighlighted = useHighlight ? hlSet.has(MONTHS[approxMonthIndex]) : true;
+      if (useHighlight && !isWeekHighlighted) {
         g.setAttribute('opacity', '0.35');
         g.style.transform = 'scale(0.97)';
         g.style.filter = 'blur(1px)';
