@@ -18,6 +18,7 @@ import { polar, segPath } from './utils.js';
  */
 export function drawWheel(svg, items, callbacks, opts = {}) {
   const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
+  const restrictMonths = Boolean(opts.restrictMonths);
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
   console.log('[YearWheel TEST] drawWheel kaldt, antal items =', Array.isArray(items) ? items.length : 'ukendt');
   // Ryd tidligere indhold
@@ -108,7 +109,11 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   });
   // Månedsringe og highligths
   const useHighlight = Array.isArray(highlightMonths) && highlightMonths.length > 0;
+  const hlSet = new Set(useHighlight ? highlightMonths : []);
   for (let m = 0; m < 12; m++) {
+    const monthName = MONTHS[m];
+    const monthSelected = !useHighlight || hlSet.has(monthName);
+    if (restrictMonths && useHighlight && !monthSelected) continue;
     const a1 = (2 * Math.PI) * (m / 12) - Math.PI / 2;
     const a2 = (2 * Math.PI) * ((m + 1) / 12) - Math.PI / 2;
     const qIndex = Math.floor(m / 3);
@@ -116,7 +121,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', segPath(cx, cy, rQuarterOuter, rMonthOuter, a1, a2));
     path.setAttribute('fill', `var(--q${qIndex + 1})`);
-    const isHl = useHighlight && highlightMonths.includes(MONTHS[m]);
+    const isHl = useHighlight && hlSet.has(monthName);
     path.setAttribute('opacity', isHl ? '0.45' : (useHighlight ? '0.14' : '0.30'));
     if (isHl) {
       path.setAttribute('stroke', 'rgba(255,255,255,0.65)');
@@ -125,7 +130,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     path.style.transition = 'opacity 260ms ease, stroke 260ms ease';
     path.style.cursor = 'pointer';
     path.classList.add('month-seg');
-    path.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
+    path.addEventListener('click', () => callbacks.openMonth(monthName));
     path.addEventListener('dragover', e => e.preventDefault());
     path.addEventListener('drop', e => {
       const id = e.dataTransfer.getData('text/plain');
@@ -172,10 +177,10 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     txt.setAttribute('text-anchor', 'middle');
     txt.setAttribute('font-size', '12');
     txt.setAttribute('fill', isHl ? '#ffffff' : (useHighlight ? 'rgba(255,255,255,0.42)' : '#ffffff'));
-    txt.textContent = MONTHS[m];
+    txt.textContent = monthName;
     txt.style.cursor = 'pointer';
     if (isHl) txt.setAttribute('font-weight', '700');
-    txt.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
+    txt.addEventListener('click', () => callbacks.openMonth(monthName));
     svg.appendChild(txt);
   }
   // Beregn ugetællinger (52 segmenter) og farver baseret på kategori
@@ -194,6 +199,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   for (let i = 0; i < 52; i++) {
     const a1 = (2 * Math.PI) * (i / 52) - Math.PI / 2;
     const a2 = (2 * Math.PI) * ((i + 1) / 52) - Math.PI / 2;
+    const approxMonthIndex = Math.floor((i * 12) / 52);
+    if (restrictMonths && useHighlight && !hlSet.has(MONTHS[approxMonthIndex])) continue;
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', segPath(cx, cy, rMonthOuter, rWeekOuter, a1, a2));
     path.setAttribute('fill', 'transparent');
@@ -204,7 +211,6 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     path.addEventListener('dragover', e => e.preventDefault());
     path.addEventListener('drop', e => {
       const id = e.dataTransfer.getData('text/plain');
-      const approxMonthIndex = Math.floor((i * 12) / 52);
       const monthName = MONTHS[approxMonthIndex];
       const segInMonth = i - Math.round(approxMonthIndex * 52 / 12);
       const weekNum = Math.max(1, Math.min(5, Math.round((segInMonth * 4) / (52 / 12)) + 1));
@@ -217,6 +223,11 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       const [bx, by] = polar(cx, cy, (rMonthOuter + rWeekOuter) / 2, mid);
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.classList.add('marker');
+      if (useHighlight && !isHl) {
+        g.setAttribute('opacity', '0.35');
+        g.style.transform = 'scale(0.97)';
+        g.style.filter = 'blur(1px)';
+      }
       const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       c.setAttribute('cx', bx);
       c.setAttribute('cy', by);

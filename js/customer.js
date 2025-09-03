@@ -180,12 +180,14 @@ function render(focusedMonth = null) {
     moveItemToMonth: () => {},
     moveItemToMonthWeek: () => {}
   };
-  drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths });
+  drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: true });
   // Apply zoom on customer wheel similar to main
   clampPanCustomer();
   wheelSvg.style.transformOrigin = '50% 50%';
   wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`.replace('{panX}', panX).replace('{panY}', panY);
-  const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
+  const listItems = (highlightMonths && highlightMonths.length)
+    ? items.filter(x => highlightMonths.includes(x.month))
+    : (focusedMonth ? items.filter(x => x.month === focusedMonth) : items);
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning
   // Collapsible activities (customer view)
@@ -266,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filterStatus.addEventListener('change', applyFilters);
   }
   // render next box
-  renderNext(items);
+  renderNext(listItems);
   // Add zoom controls on customer view
   const wrap = document.querySelector('.wheel-wrap');
   if (wrap && !wrap.querySelector('.zoom-controls')) {
@@ -356,6 +358,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   render(null);
+  // A11y: aria description
+  if (wheelSvg && highlightMonths && highlightMonths.length) {
+    const quarters = new Set(highlightMonths.map(m => {
+      const idx = MONTHS.indexOf(m);
+      return idx < 3 ? 'Q1' : idx < 6 ? 'Q2' : idx < 9 ? 'Q3' : 'Q4';
+    }));
+    wheelSvg.setAttribute('aria-label', `Viser ${[...quarters].join(', ')}`);
+  }
   if (params.get('print') === '1') {
     setTimeout(() => window.print(), 400);
   }

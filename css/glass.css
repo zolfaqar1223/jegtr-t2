@@ -124,7 +124,7 @@ button:hover {
 
 /* Wheel hover/focus glows */
 .month-seg {
-  transition: filter 120ms ease, opacity 120ms ease;
+  transition: filter 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms cubic-bezier(0.22, 1, 0.36, 1), transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .month-seg:hover {
   filter: drop-shadow(0 0 10px var(--neon));
