@@ -65,8 +65,10 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     container.appendChild(bubbleLayer);
   }
   bubbleLayer.innerHTML = '';
-  // reset registry used for collision management in this render
+  // reset registries for this render
   bubbleLayer._rects = [];
+  bubbleLayer._leftY = 12;
+  bubbleLayer._rightY = 12;
   const cw = container ? container.getBoundingClientRect().width : 0;
   const size = Math.min(cw || svg.clientWidth || 700, 1000);
   const cx = size / 2;
@@ -380,54 +382,31 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
   wrap.appendChild(bubble);
   wrap.appendChild(thread);
-  // Radial placement from center towards outside with collision avoidance
-  const dx = x - cx;
-  const dy = y - cy;
-  const dist = Math.hypot(dx, dy) || 1;
-  const ux = dx / dist;
-  const uy = dy / dist;
+  // Side stacking layout
   const wrapCR = wrap.getBoundingClientRect();
-  // pre-measure bubble size
+  // pre-measure bubble to know width/height
   bubble.style.left = '-9999px'; bubble.style.top = '-9999px';
-  const bcr0 = bubble.getBoundingClientRect();
-  const bw = bcr0.width || 240; const bh = bcr0.height || 80;
-  const tx = -uy, ty = ux; // tangent unit
-  const baseR = 64 + (offsetIndex||0)*18;
-  const spread = Math.max(26, Math.round(bh*0.6));
-  const margin = 8;
-  // Build registry of already placed bubbles in this layer
-  const layer = wrap.querySelector('.bubble-layer') || wrap;
-  // Use bubble layer registry which was reset at the start of draw
-  const rects = (layer._rects = layer._rects || []);
-  function hit(r){ return rects.some(a => !(r.right < a.left || r.left > a.right || r.bottom < a.top || r.top > a.bottom)); }
-  let finalRect = null;
-  for (let ring = 0; ring < 4 && !finalRect; ring++) {
-    const r = baseR + ring*22;
-    const offs = [0,1,-1,2,-2,3,-3,4,-4];
-    for (const k of offs) {
-      const cxB = x + ux*r + tx*(k*spread);
-      const cyB = y + uy*r + ty*(k*spread);
-      let left = cxB - bw/2, top = cyB - bh/2;
-      left = Math.max(wrapCR.left+margin, Math.min(wrapCR.right-margin-bw, left));
-      top  = Math.max(wrapCR.top+margin,  Math.min(wrapCR.bottom-margin-bh, top));
-      const cand = { left, top, right: left+bw, bottom: top+bh };
-      if (!hit(cand)) { finalRect = cand; break; }
-    }
-  }
-  if (!finalRect) {
-    const left = Math.max(wrapCR.left+margin, Math.min(wrapCR.right-margin-bw, x + 20));
-    const top  = Math.max(wrapCR.top+margin,  Math.min(wrapCR.bottom-margin-bh, y - bh/2));
-    finalRect = { left, top, right: left+bw, bottom: top+bh };
-  }
-  bubble.style.left = (finalRect.left - wrapCR.left) + 'px';
-  bubble.style.top  = (finalRect.top  - wrapCR.top)  + 'px';
-  rects.push(finalRect);
-  // Thread: nearest point on finalRect
+  const bcrTest = bubble.getBoundingClientRect();
+  const bw = bcrTest.width || 240; const bh = bcrTest.height || 80;
+  const margin = 12; const gap = 10;
+  const isRight = x >= cx;
+  // Use layer counters prepared at render start
+  if (typeof wrap._leftY !== 'number') wrap._leftY = 12;
+  if (typeof wrap._rightY !== 'number') wrap._rightY = 12;
+  let left, top;
+  if (isRight) { left = wrapCR.right - margin - bw; top = wrap._rightY; wrap._rightY = top + bh + gap; }
+  else { left = wrapCR.left + margin; top = wrap._leftY; wrap._leftY = top + bh + gap; }
+  // Clamp inside container vertically
+  top = Math.max(wrapCR.top + margin, Math.min(wrapCR.bottom - margin - bh, top));
+  bubble.style.left = (left - wrapCR.left) + 'px';
+  bubble.style.top  = (top - wrapCR.top) + 'px';
+  // Thread from marker to nearest edge of bubble rect
+  const finalRect = { left, top, right: left + bw, bottom: top + bh };
   const x1 = x, y1 = y;
   const x2 = Math.max(finalRect.left, Math.min(finalRect.right, x1));
   const y2 = Math.max(finalRect.top,  Math.min(finalRect.bottom, y1));
   const len = Math.hypot(x2-x1, y2-y1);
-  const angle = Math.atan2(y2-y1, x2-x1)*180/Math.PI;
+  const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
   thread.style.left = (x1 - wrapCR.left) + 'px';
   thread.style.top  = (y1 - wrapCR.top)  + 'px';
   thread.style.width = len + 'px';
