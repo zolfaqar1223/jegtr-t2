@@ -182,7 +182,7 @@ function render(focusedMonth = null) {
   };
   try {
     // Stable render; enable persistent bubbles on customer view
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: true });
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: true, panX, panY, zoom: zoomLevel });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {

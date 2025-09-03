@@ -20,6 +20,9 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
   const restrictMonths = Boolean(opts.restrictMonths);
   const showBubbles = Boolean(opts.showBubbles);
+  const panX = Number.isFinite(opts.panX) ? opts.panX : 0;
+  const panY = Number.isFinite(opts.panY) ? opts.panY : 0;
+  const zoom = Number.isFinite(opts.zoom) ? opts.zoom : 1;
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
   try { console.debug('[YearWheel] draw', Array.isArray(items) ? items.length : 'ukendt'); } catch {}
   // Ryd tidligere indhold
@@ -51,6 +54,17 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   }
   // Use container width to avoid CSS transform affecting measurement
   const container = svg.parentElement;
+  // Ensure a bubble layer exists (absolute, shares transform with wheel)
+  let bubbleLayer = container.querySelector('.bubble-layer');
+  if (!bubbleLayer) {
+    bubbleLayer = document.createElement('div');
+    bubbleLayer.className = 'bubble-layer';
+    bubbleLayer.style.position = 'absolute';
+    bubbleLayer.style.inset = '0';
+    bubbleLayer.style.pointerEvents = 'none';
+    container.appendChild(bubbleLayer);
+  }
+  bubbleLayer.innerHTML = '';
   const cw = container ? container.getBoundingClientRect().width : 0;
   const size = Math.min(cw || svg.clientWidth || 700, 1000);
   const cx = size / 2;
@@ -282,10 +296,12 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
         itemsInSeg.forEach((it, idxInSeg) => {
           const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          createPersistentBubble(svg, cx, cy, bx, by, it, color, idxInSeg);
+          const px = bx * zoom + panX;
+          const py = by * zoom + panY;
+          createPersistentBubble(bubbleLayer, cx * zoom + panX, cy * zoom + panY, px, py, it, color, idxInSeg);
           // Emphasis on hover
-          g.addEventListener('mouseenter', () => emphasizeBubble(svg, it, true));
-          g.addEventListener('mouseleave', () => emphasizeBubble(svg, it, false));
+          g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
+          g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
         });
       }
     }
