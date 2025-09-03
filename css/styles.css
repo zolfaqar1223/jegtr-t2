@@ -434,9 +434,12 @@ svg {
   border-radius: 14px;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "content"
+    "actions";
   align-items: start;
-  gap: 10px;
+  row-gap: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
   transition: transform 160ms ease, box-shadow 160ms ease, background 200ms ease, border-color 200ms ease;
   position: relative;
@@ -451,6 +454,7 @@ svg {
 .item-content {
   flex: 1 1 auto;
   min-width: 0;
+  grid-area: content;
 }
 
 .item strong {
@@ -472,11 +476,14 @@ svg {
 .attach-chip { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); padding: 4px 8px; border-radius: 999px; font-size: 11px; color: var(--text); text-decoration: none; }
 
 .actions {
+  grid-area: actions;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
   flex: 0 0 auto;
-  align-self: center;
 }
 
 .item .actions button {
