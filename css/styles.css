@@ -168,11 +168,11 @@ button.ghost:hover {
 
 .wrap {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: 1.3fr 0.7fr;
+  grid-template-rows: auto auto;
   grid-template-areas:
-    "wheel form"
-    "acts  acts";
+    "wheel wheel"
+    "form  acts";
   gap: 20px;
   padding: 20px;
 }
@@ -180,7 +180,7 @@ button.ghost:hover {
 /* Resizable panels */
 .card[contenteditable="false"] { user-select: none; }
 .resizable {
-  resize: both;
+  resize: none;
   overflow: auto;
   min-width: 260px;
   min-height: 160px;
@@ -234,7 +234,7 @@ textarea {
 
 textarea {
   min-height: 100px;
-  resize: vertical;
+  resize: none;
 }
 
 .form-actions {
@@ -275,7 +275,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 680px;
+  min-height: 520px;
   grid-area: wheel;
   padding: 24px; /* luft inde i widget */
 }
@@ -385,8 +385,8 @@ textarea {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
     grid-template-areas:
-      "form"
       "wheel"
+      "form"
       "acts";
   }
   .list { max-height: 46vh; }
@@ -537,7 +537,7 @@ svg {
   padding: 8px;
   background: #0f2f2a;
   color: var(--text);
-  resize: vertical;
+  resize: none;
 }
 
 .modal-actions {
@@ -549,17 +549,19 @@ svg {
 
 body.customer .wrap {
   display: grid;
-  grid-template-columns: 1.6fr 0.8fr;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
   grid-template-areas:
-    "wheel acts"
-    "wheel acts";
+    "next"
+    "wheel"
+    "acts";
   gap: 20px;
 }
+body.customer #nextSection { grid-area: next; }
 body.customer .wheel-wrap { grid-area: wheel; }
 body.customer #listSection { grid-area: acts; }
 /* Bigger wheel on customer */
-.customer .wheel-wrap { min-height: 760px; }
+.customer .wheel-wrap { min-height: 520px; }
 /* Ensure wheel SVG scales large on customer view */
 .customer .wheel-wrap #wheel {
   width: 100%;
