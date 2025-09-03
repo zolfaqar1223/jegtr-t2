@@ -296,12 +296,19 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
         itemsInSeg.forEach((it, idxInSeg) => {
           const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          // Convert SVG coords (bx,by) to screen coords with zoom around center and pan
-          const cxScreen = cx + panX;
-          const cyScreen = cy + panY;
-          const px = cx + (bx - cx) * zoom + panX;
-          const py = cy + (by - cy) * zoom + panY;
-          createPersistentBubble(bubbleLayer, cxScreen, cyScreen, px, py, it, color, idxInSeg);
+          // Map from drawing space (size) to element layout pixels (pre-transform)
+          const baseW = svg.clientWidth || size;
+          const baseH = svg.clientHeight || size;
+          const svgLeft = svg.offsetLeft || 0;
+          const svgTop = svg.offsetTop || 0;
+          const cxPx0 = svgLeft + (cx / size) * baseW;
+          const cyPx0 = svgTop + (cy / size) * baseH;
+          const px0 = svgLeft + (bx / size) * baseW;
+          const py0 = svgTop + (by / size) * baseH;
+          // Apply zoom around center and pan (same formula as CSS transform)
+          const px = cxPx0 + (px0 - cxPx0) * zoom + panX;
+          const py = cyPx0 + (py0 - cyPx0) * zoom + panY;
+          createPersistentBubble(bubbleLayer, cxPx0 + panX, cyPx0 + panY, px, py, it, color, idxInSeg);
           // Emphasis on hover
           g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
           g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
@@ -379,9 +386,13 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   // Decide preferred side based on marker relative to center
   const rightSide = x >= cx;
   const aboveCenter = y < cy;
-  const pref = rightSide
-    ? [ {dx: 140, dy: -20}, {dx: 140, dy: 40}, {dx: -320, dy: -20}, {dx: -320, dy: 40} ]
-    : [ {dx: -320, dy: -20}, {dx: -320, dy: 40}, {dx: 140, dy: -20}, {dx: 140, dy: 40} ];
+  const radius = 120; // distance from marker to bubble center
+  const pref = [
+    {dx: rightSide ? radius : -radius, dy: -24},
+    {dx: rightSide ? radius : -radius, dy: 24},
+    {dx: rightSide ? radius + 20 : -(radius + 20), dy: 0},
+    {dx: rightSide ? radius : -radius, dy: (aboveCenter ? 48 : -48)}
+  ];
   const rect = wrap.getBoundingClientRect();
   let placed = false;
   for (const p of pref) {
