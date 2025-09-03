@@ -296,19 +296,16 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
         itemsInSeg.forEach((it, idxInSeg) => {
           const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          // Map from drawing space (size) to element layout pixels (pre-transform)
-          const baseW = svg.clientWidth || size;
-          const baseH = svg.clientHeight || size;
-          const svgLeft = svg.offsetLeft || 0;
-          const svgTop = svg.offsetTop || 0;
-          const cxPx0 = svgLeft + (cx / size) * baseW;
-          const cyPx0 = svgTop + (cy / size) * baseH;
-          const px0 = svgLeft + (bx / size) * baseW;
-          const py0 = svgTop + (by / size) * baseH;
-          // Apply zoom around center and pan (same formula as CSS transform)
-          const px = cxPx0 + (px0 - cxPx0) * zoom + panX;
-          const py = cyPx0 + (py0 - cyPx0) * zoom + panY;
-          createPersistentBubble(bubbleLayer, cxPx0 + panX, cyPx0 + panY, px, py, it, color, idxInSeg);
+          // Use viewport-coordinates based on actual SVG rect
+          const rect = svg.getBoundingClientRect();
+          const centerX0 = rect.left + rect.width / 2;
+          const centerY0 = rect.top + rect.height / 2;
+          const px0 = rect.left + (bx / size) * rect.width;
+          const py0 = rect.top + (by / size) * rect.height;
+          // Apply the same transform as CSS (scale around center then translate)
+          const px = centerX0 + (px0 - centerX0) * zoom + panX;
+          const py = centerY0 + (py0 - centerY0) * zoom + panY;
+          createPersistentBubble(bubbleLayer, centerX0 + panX, centerY0 + panY, px, py, it, color, idxInSeg);
           // Emphasis on hover
           g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
           g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
@@ -389,7 +386,8 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const dist = Math.hypot(dx, dy) || 1;
   const ux = dx / dist;
   const uy = dy / dist;
-  const baseOffset = 100 + (offsetIndex||0)*24;
+  // Offset just outside the week ring so it sits near the marker
+  const baseOffset = 70 + (offsetIndex||0)*22;
   // target bubble center
   let bx = x + ux * baseOffset;
   let by = y + uy * baseOffset;
