@@ -180,7 +180,22 @@ function render(focusedMonth = null) {
     moveItemToMonth: () => {},
     moveItemToMonthWeek: () => {}
   };
-  drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: true });
+  try {
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: true });
+  } catch (err) {
+    try { console.error('Fejl ved tegning af hjul', err); } catch {}
+    if (wheelSvg) {
+      wheelSvg.innerHTML = '';
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', '50%');
+      txt.setAttribute('y', '50%');
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('fill', '#fff');
+      txt.setAttribute('font-size', '14');
+      txt.textContent = 'Kunne ikke vise årshjul';
+      wheelSvg.appendChild(txt);
+    }
+  }
   // Apply zoom on customer wheel similar to main
   clampPanCustomer();
   wheelSvg.style.transformOrigin = '50% 50%';

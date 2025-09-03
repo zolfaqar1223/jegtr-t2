@@ -4,7 +4,7 @@
 // måned samt flytte aktiviteter via drag‑and‑drop. Selve tegningen
 // er opdelt i kvartaler, måneder og uger (52 segmenter).
 
-import { MONTHS, CAT_COLORS } from './store.js';
+import { MONTHS, CAT_COLORS, STATUS_COLORS } from './store.js';
 import { polar, segPath } from './utils.js';
 
 /**
@@ -268,6 +268,65 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         }
       });
       svg.appendChild(g);
+
+      // Info bubble on hover/click
+      const itemForDot = items.find(x => MONTHS.indexOf(x.month) === Math.floor((i * 12)/52) && x.week === Math.max(1, Math.min(5, Math.round(( (i - Math.round(Math.floor((i*12)/52) * 52 / 12)) * 4) / (52/12)) + 1))));
+      if (itemForDot) {
+        const color = CAT_COLORS[itemForDot.cat] || 'var(--accent)';
+        g.addEventListener('mouseenter', () => showEventBubble(svg, bx, by, itemForDot, color));
+        g.addEventListener('mouseleave', () => hideEventBubble());
+        g.addEventListener('focus', () => showEventBubble(svg, bx, by, itemForDot, color));
+        g.addEventListener('blur', () => hideEventBubble());
+      }
     }
   }
+}
+
+// ====== Event bubble helpers ======
+let currentBubble = null;
+let currentThread = null;
+function hideEventBubble() {
+  if (currentBubble) { currentBubble.classList.remove('show'); setTimeout(()=>{ if(currentBubble&&currentBubble.parentNode) currentBubble.parentNode.removeChild(currentBubble); currentBubble=null; }, 200); }
+  if (currentThread) { if(currentThread.parentNode) currentThread.parentNode.removeChild(currentThread); currentThread = null; }
+}
+function showEventBubble(svg, x, y, item, color) {
+  hideEventBubble();
+  const wrap = svg.parentElement;
+  if (!wrap) return;
+  const bubble = document.createElement('div');
+  bubble.className = 'event-bubble';
+  const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
+  bubble.innerHTML = `<div class="heading">${item.title}</div><div class="meta"><span>Uge ${item.isoWeek||item.week}</span><span>${dateStr}</span></div>${item.note?`<div class="note">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status" style="border-color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};">${item.status||'Planlagt'}</span></div>`;
+  const thread = document.createElement('div');
+  thread.className = 'event-thread';
+  thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
+  wrap.appendChild(bubble);
+  wrap.appendChild(thread);
+  // Position bubble outside the wheel, try right then left then top/bottom
+  const rect = wrap.getBoundingClientRect();
+  const px = x; const py = y;
+  const pref = [ {dx: 140, dy: -20}, {dx: -320, dy: -20}, {dx: -80, dy: -120}, {dx: -80, dy: 80} ];
+  let placed = false;
+  for (const p of pref) {
+    const left = px + p.dx;
+    const top = py + p.dy;
+    bubble.style.left = left + 'px';
+    bubble.style.top = top + 'px';
+    const bcr = bubble.getBoundingClientRect();
+    if (bcr.left >= rect.left + 8 && bcr.right <= rect.right - 8 && bcr.top >= rect.top + 8 && bcr.bottom <= rect.bottom - 8) { placed = true; break; }
+  }
+  if (!placed) { bubble.style.left = (px + 120) + 'px'; bubble.style.top = (py - 20) + 'px'; }
+  // Thread from marker to bubble edge
+  const bcr2 = bubble.getBoundingClientRect();
+  const wrapCR = wrap.getBoundingClientRect();
+  const x1 = px; const y1 = py; const x2 = Math.max(bcr2.left - wrapCR.left, Math.min(bcr2.right - wrapCR.left, x1 + 1)); const y2 = Math.max(bcr2.top - wrapCR.top, Math.min(bcr2.bottom - wrapCR.top, y1));
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  thread.style.left = x1 + 'px';
+  thread.style.top = y1 + 'px';
+  thread.style.width = len + 'px';
+  thread.style.transformOrigin = '0 0';
+  thread.style.transform = `rotate(${angle}deg)`;
+  requestAnimationFrame(()=> bubble.classList.add('show'));
+  currentBubble = bubble; currentThread = thread;
 }
