@@ -181,8 +181,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    // Stable render; enable persistent bubbles on customer view
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: true, panX, panY, zoom: zoomLevel });
+    // Stable render; use quarter boxes for clean grouped display
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
