@@ -510,10 +510,12 @@ function setupZoomControls() {
     btnMinus.addEventListener('click', () => {
       zoomLevel = Math.max(0.6, Math.round((zoomLevel - 0.1) * 10) / 10);
       applyTransform();
+      writeSettings({ ...settings, zoomLevel, panX, panY });
     });
     btnPlus.addEventListener('click', () => {
       zoomLevel = Math.min(1.8, Math.round((zoomLevel + 0.1) * 10) / 10);
       applyTransform();
+      writeSettings({ ...settings, zoomLevel, panX, panY });
     });
     btnPan.addEventListener('click', () => {
       isPanMode = !isPanMode;
@@ -538,6 +540,7 @@ function setupZoomControls() {
       lastMouseX = e.clientX;
       lastMouseY = e.clientY;
       applyTransform();
+      writeSettings({ ...settings, zoomLevel, panX, panY });
     });
     window.addEventListener('mouseup', () => {
       if (!isPanning) return;
@@ -574,6 +577,7 @@ function setupWheelScrollZoom() {
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
       zoomLevel = Math.max(0.6, Math.min(1.8, Math.round((zoomLevel + delta) * 10) / 10));
       applyTransform();
+      writeSettings({ ...settings, zoomLevel, panX, panY });
     }
   }, { passive: false });
 }
@@ -705,10 +709,10 @@ document.addEventListener('DOMContentLoaded', () => {
   settings = readSettings();
   if (settings.activeCategory) activeCategory = settings.activeCategory;
   if (settings.activeStatus) activeStatus = settings.activeStatus;
-  // Start altid centreret og zoomet så hele hjulet er synligt
-  zoomLevel = 0.8;
-  panX = 0;
-  panY = 0;
+  // Start fra gemte indstillinger hvis de findes; ellers en rolig standard
+  zoomLevel = (typeof settings.zoomLevel === 'number') ? settings.zoomLevel : 0.8;
+  panX = (typeof settings.panX === 'number') ? settings.panX : 0;
+  panY = (typeof settings.panY === 'number') ? settings.panY : 0;
   if (typeof settings.activitiesExpanded === 'undefined') settings.activitiesExpanded = true;
   // setup UI
   initSelects();

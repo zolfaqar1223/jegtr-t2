@@ -1,5 +1,5 @@
 // Kundevisning: read-only rendering af hjul og liste
-import { MONTHS, readItems, readNotes, CAT_COLORS, STATUSES, CATS } from './store.js';
+import { MONTHS, readItems, readNotes, CAT_COLORS, STATUSES, CATS, readSettings } from './store.js';
 import { drawWheel } from './wheel.js';
 
 const wheelSvg = document.getElementById('wheel');
@@ -265,6 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnPrintCustomer').addEventListener('click', () => {
     window.print();
   });
+  // Start med samme pan/zoom som main, hvis tilgængelig
+  try {
+    const s = readSettings();
+    if (typeof s.zoomLevel === 'number') zoomLevel = s.zoomLevel;
+    if (typeof s.panX === 'number') panX = s.panX;
+    if (typeof s.panY === 'number') panY = s.panY;
+  } catch {}
   // populate filters
   if (filterCat && filterStatus) {
     ['Alle', ...CATS].forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; filterCat.appendChild(o); });
