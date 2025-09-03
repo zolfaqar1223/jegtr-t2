@@ -345,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   const vc = document.getElementById('viewerClose');
+  const seeAllBtn = document.getElementById('seeAllCustomer');
   if (vc) vc.addEventListener('click', closeViewer);
   const seeAll = () => render(null);
   if (seeAllBtn) seeAllBtn.addEventListener('click', seeAll);
