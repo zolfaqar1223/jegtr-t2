@@ -433,9 +433,9 @@ svg {
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
   padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
   gap: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
   transition: transform 160ms ease, box-shadow 160ms ease, background 200ms ease, border-color 200ms ease;
@@ -464,7 +464,8 @@ svg {
   margin-top: 1px;
   color: rgba(255,255,255,0.96);
 }
-.item .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.item .meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; overflow-wrap: anywhere; word-break: break-word; }
+.item .note { overflow-wrap: anywhere; word-break: break-word; }
 /* Inline expandable details for list items */
 .inline-details { margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.12); padding-top: 8px; }
 .attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -475,6 +476,7 @@ svg {
   flex-direction: column;
   gap: 4px;
   flex: 0 0 auto;
+  align-self: center;
 }
 
 .item .actions button {
