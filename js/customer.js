@@ -181,8 +181,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    // Rollback to stable: render full wheel (no restrict), optional focus only
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth });
+    // Stable render; enable persistent bubbles on customer view
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: true });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {

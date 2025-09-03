@@ -19,7 +19,7 @@ import { polar, segPath } from './utils.js';
 export function drawWheel(svg, items, callbacks, opts = {}) {
   const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
   const restrictMonths = Boolean(opts.restrictMonths);
-  const showBubbles = false; // safety gate to ensure stable wheel render
+  const showBubbles = Boolean(opts.showBubbles);
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
   try { console.debug('[YearWheel] draw', Array.isArray(items) ? items.length : 'ukendt'); } catch {}
   // Ryd tidligere indhold
@@ -274,20 +274,19 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       });
       svg.appendChild(g);
 
-      // Info bubble on hover/click (safe calculation; only when enabled)
-      let itemForDot = null;
+      // Persistent info bubbles per activity in this segment (customer view only)
       if (showBubbles) {
         const mi = Math.floor((i * 12) / 52);
         const segInM = i - Math.round(mi * 52 / 12);
         const wk = Math.max(1, Math.min(5, Math.round((segInM * 4) / (52 / 12)) + 1));
-        itemForDot = items.find(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
-      }
-      if (itemForDot && showBubbles) {
-        const color = CAT_COLORS[itemForDot.cat] || 'var(--accent)';
-        g.addEventListener('mouseenter', () => showEventBubble(svg, bx, by, itemForDot, color));
-        g.addEventListener('mouseleave', () => hideEventBubble());
-        g.addEventListener('focus', () => showEventBubble(svg, bx, by, itemForDot, color));
-        g.addEventListener('blur', () => hideEventBubble());
+        const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
+        itemsInSeg.forEach((it, idxInSeg) => {
+          const color = CAT_COLORS[it.cat] || 'var(--accent)';
+          createPersistentBubble(svg, cx, cy, bx, by, it, color, idxInSeg);
+          // Emphasis on hover
+          g.addEventListener('mouseenter', () => emphasizeBubble(svg, it, true));
+          g.addEventListener('mouseleave', () => emphasizeBubble(svg, it, false));
+        });
       }
     }
   }
@@ -340,4 +339,61 @@ function showEventBubble(svg, x, y, item, color) {
   thread.style.transform = `rotate(${angle}deg)`;
   requestAnimationFrame(()=> bubble.classList.add('show'));
   currentBubble = bubble; currentThread = thread;
+}
+
+// Create persistent bubble that stays visible
+function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
+  const wrap = svg.parentElement;
+  if (!wrap) return;
+  const id = `bubble_${(item.id||item.title||'').toString().replace(/[^a-z0-9]/ig,'_')}`;
+  if (document.getElementById(id)) return; // avoid duplicates
+  const bubble = document.createElement('div');
+  bubble.className = 'event-bubble show';
+  bubble.id = id;
+  const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
+  bubble.innerHTML = `<div class="heading">${item.title}</div><div class="meta"><span>Uge ${item.isoWeek||item.week}</span>${dateStr?`<span>${dateStr}</span>`:''}</div>${item.note?`<div class=\"note\">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status">${item.status||'Planlagt'}</span></div>`;
+  const thread = document.createElement('div');
+  thread.className = 'event-thread';
+  thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
+  wrap.appendChild(bubble);
+  wrap.appendChild(thread);
+  // Decide preferred side based on marker relative to center
+  const rightSide = x >= cx;
+  const aboveCenter = y < cy;
+  const pref = rightSide
+    ? [ {dx: 140, dy: -20}, {dx: 140, dy: 40}, {dx: -320, dy: -20}, {dx: -320, dy: 40} ]
+    : [ {dx: -320, dy: -20}, {dx: -320, dy: 40}, {dx: 140, dy: -20}, {dx: 140, dy: 40} ];
+  const rect = wrap.getBoundingClientRect();
+  let placed = false;
+  for (const p of pref) {
+    const left = x + p.dx;
+    const top = y + p.dy + (offsetIndex||0)*22;
+    bubble.style.left = left + 'px';
+    bubble.style.top = top + 'px';
+    const bcr = bubble.getBoundingClientRect();
+    if (bcr.left >= rect.left + 8 && bcr.right <= rect.right - 8 && bcr.top >= rect.top + 8 && bcr.bottom <= rect.bottom - 8) { placed = true; break; }
+  }
+  if (!placed) { bubble.style.left = (x + (rightSide?120:-280)) + 'px'; bubble.style.top = (y - 20) + 'px'; }
+  // Thread
+  const bcr2 = bubble.getBoundingClientRect();
+  const wrapCR = wrap.getBoundingClientRect();
+  const x1 = x; const y1 = y;
+  const x2 = Math.max(bcr2.left - wrapCR.left, Math.min(bcr2.right - wrapCR.left, x1 + 1));
+  const y2 = Math.max(bcr2.top - wrapCR.top, Math.min(bcr2.bottom - wrapCR.top, y1));
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  thread.style.left = x1 + 'px';
+  thread.style.top = y1 + 'px';
+  thread.style.width = len + 'px';
+  thread.style.transformOrigin = '0 0';
+  thread.style.transform = `rotate(${angle}deg)`;
+  // Hover emphasis
+  bubble.addEventListener('mouseenter', () => emphasizeBubble(svg, item, true));
+  bubble.addEventListener('mouseleave', () => emphasizeBubble(svg, item, false));
+}
+
+function emphasizeBubble(svg, item, on) {
+  const id = `bubble_${(item.id||item.title||'').toString().replace(/[^a-z0-9]/ig,'_')}`;
+  const bubble = document.getElementById(id);
+  if (bubble) bubble.style.boxShadow = on ? '0 22px 60px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.12)' : '0 18px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.08)';
 }
