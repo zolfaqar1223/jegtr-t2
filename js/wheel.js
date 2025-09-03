@@ -19,32 +19,36 @@ import { polar, segPath } from './utils.js';
 export function drawWheel(svg, items, callbacks, opts = {}) {
   const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
   const restrictMonths = Boolean(opts.restrictMonths);
+  const showBubbles = false; // safety gate to ensure stable wheel render
   // TEST markør for at bekræfte at hjulet re-renderes efter deploy
   console.log('[YearWheel TEST] drawWheel kaldt, antal items =', Array.isArray(items) ? items.length : 'ukendt');
   // Ryd tidligere indhold
   svg.innerHTML = '';
-  // Soft glow defs for premium highlight
-  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
-  grad.setAttribute('id', 'hlGrad');
-  grad.setAttribute('cx', '50%');
-  grad.setAttribute('cy', '50%');
-  grad.setAttribute('r', '60%');
-  const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-  stop1.setAttribute('offset', '0%');
-  stop1.setAttribute('stop-color', 'rgba(255,255,255,0.30)');
-  const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-  stop2.setAttribute('offset', '100%');
-  stop2.setAttribute('stop-color', 'rgba(255,255,255,0)');
-  grad.appendChild(stop1); grad.appendChild(stop2);
-  const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-  filter.setAttribute('id', 'softGlow');
-  const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-  blur.setAttribute('stdDeviation', '3');
-  blur.setAttribute('result', 'coloredBlur');
-  filter.appendChild(blur);
-  defs.appendChild(grad); defs.appendChild(filter);
-  svg.appendChild(defs);
+  if (showBubbles) {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+    grad.setAttribute('id', 'hlGrad');
+    grad.setAttribute('cx', '50%');
+    grad.setAttribute('cy', '50%');
+    grad.setAttribute('r', '60%');
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#ffffff');
+    stop1.setAttribute('stop-opacity', '0.30');
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#ffffff');
+    stop2.setAttribute('stop-opacity', '0');
+    grad.appendChild(stop1); grad.appendChild(stop2);
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'softGlow');
+    const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+    blur.setAttribute('stdDeviation', '3');
+    blur.setAttribute('result', 'coloredBlur');
+    filter.appendChild(blur);
+    defs.appendChild(grad); defs.appendChild(filter);
+    svg.appendChild(defs);
+  }
   // Use container width to avoid CSS transform affecting measurement
   const container = svg.parentElement;
   const cw = container ? container.getBoundingClientRect().width : 0;
@@ -138,7 +142,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     });
     svg.appendChild(path);
     // Subtle glow/gradient overlay for highlighted months
-    if (isHl) {
+    if (isHl && showBubbles) {
       const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const rInG = rQuarterOuter + 6;
       const rOutG = rMonthOuter - 6;
@@ -164,7 +168,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       p.setAttribute('opacity', String(opFinal));
       p.style.cursor = 'pointer';
       p.classList.add('month-seg');
-      if (isHl) p.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.35))';
+      if (isHl && showBubbles) p.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.35))';
       p.addEventListener('click', () => callbacks.openMonth(MONTHS[m]));
       svg.appendChild(p);
     }
@@ -270,8 +274,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       svg.appendChild(g);
 
       // Info bubble on hover/click
-      const itemForDot = items.find(x => MONTHS.indexOf(x.month) === Math.floor((i * 12)/52) && x.week === Math.max(1, Math.min(5, Math.round(( (i - Math.round(Math.floor((i*12)/52) * 52 / 12)) * 4) / (52/12)) + 1))));
-      if (itemForDot) {
+      const itemForDot = showBubbles ? items.find(x => MONTHS.indexOf(x.month) === Math.floor((i * 12)/52) && x.week === Math.max(1, Math.min(5, Math.round(( (i - Math.round(Math.floor((i*12)/52) * 52 / 12)) * 4) / (52/12)) + 1)))) : null;
+      if (itemForDot && showBubbles) {
         const color = CAT_COLORS[itemForDot.cat] || 'var(--accent)';
         g.addEventListener('mouseenter', () => showEventBubble(svg, bx, by, itemForDot, color));
         g.addEventListener('mouseleave', () => hideEventBubble());
