@@ -274,8 +274,14 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       });
       svg.appendChild(g);
 
-      // Info bubble on hover/click
-      const itemForDot = showBubbles ? items.find(x => MONTHS.indexOf(x.month) === Math.floor((i * 12)/52) && x.week === Math.max(1, Math.min(5, Math.round(( (i - Math.round(Math.floor((i*12)/52) * 52 / 12)) * 4) / (52/12)) + 1)))) : null;
+      // Info bubble on hover/click (safe calculation; only when enabled)
+      let itemForDot = null;
+      if (showBubbles) {
+        const mi = Math.floor((i * 12) / 52);
+        const segInM = i - Math.round(mi * 52 / 12);
+        const wk = Math.max(1, Math.min(5, Math.round((segInM * 4) / (52 / 12)) + 1));
+        itemForDot = items.find(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
+      }
       if (itemForDot && showBubbles) {
         const color = CAT_COLORS[itemForDot.cat] || 'var(--accent)';
         g.addEventListener('mouseenter', () => showEventBubble(svg, bx, by, itemForDot, color));
