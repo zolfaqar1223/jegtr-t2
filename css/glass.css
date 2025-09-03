@@ -91,7 +91,7 @@ button:hover {
 .list.compact .item { padding: 8px 12px; }
 
 /* Top-right actions */
-.item .actions { position: absolute; top: 10px; right: 10px; flex-direction: row; gap: 6px; }
+/* list items now place actions via grid; keep relative for hover */
 .item { position: relative; }
 
 /* Hover/focus and active states */

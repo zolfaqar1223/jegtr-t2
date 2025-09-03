@@ -434,20 +434,16 @@ svg {
   border-radius: 14px;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "content"
-    "actions";
-  grid-template-rows: auto auto;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "content actions";
   align-items: start;
-  row-gap: 10px;
+  column-gap: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
   transition: transform 160ms ease, box-shadow 160ms ease, background 200ms ease, border-color 200ms ease;
   position: relative;
   z-index: 1;
   overflow: visible;
   width: 100%;
-  padding-bottom: 18px;
 }
 
 .item:hover {
@@ -483,14 +479,18 @@ svg {
   grid-area: actions;
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 8px;
   justify-content: flex-end;
   align-items: center;
   flex: 0 0 auto;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(255,255,255,0.12);
+}
+.actions button {
+  height: 34px;
+  padding: 6px 14px;
+  min-width: 96px;
+  border-radius: 10px;
+  font-size: 12px;
 }
 .actions button { white-space: nowrap; }
 
@@ -503,7 +503,7 @@ svg {
 }
 
 .item button[data-act="del"] {
-  background: transparent;
+  background: rgba(255, 99, 99, 0.10);
   color: #ff6b6b;
   border: 1px solid #ff6b6b;
 }
@@ -513,8 +513,8 @@ svg {
 }
 
 .item button.ghost {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.24);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.28);
   color: var(--text);
 }
 .item button.ghost:hover {
