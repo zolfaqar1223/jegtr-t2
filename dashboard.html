@@ -15,16 +15,16 @@
       <a class="ghost" href="index.html" id="btnBack">Tilbage</a>
     </div>
   </header>
-  <main class="wrap" style="grid-template-columns: 1.2fr 1fr; grid-template-rows: auto auto auto auto; grid-template-areas: 'list kpi' 'charts charts' 'resources risks' 'insights changelog';">
-    <section class="card glass" id="kpiSection" style="gap:10px; grid-area: kpi;">
+  <main class="dash-wrap">
+    <section class="card glass widget" id="kpiSection" style="gap:10px; grid-column: 1 / -1;">
       <h3>KPI’er</h3>
       <div id="kpiBar" style="display:grid;grid-template-columns:repeat(2, minmax(160px,1fr));gap:12px;align-items:stretch;"></div>
     </section>
-    <section class="card glass" id="insightsSection" style="grid-area: insights;">
+    <section class="card glass widget" id="insightsSection" style="grid-column: span 4;">
       <h3>Indsigter</h3>
       <div id="insights" class="list"></div>
     </section>
-    <section class="card glass" id="chartsSection" style="grid-area: charts; max-height: 420px; overflow: hidden;">
+    <section class="card glass widget" id="chartsSection" style="grid-column: span 8; max-height: 420px; overflow: hidden;">
       <h3>Status & Kategorier</h3>
       <div class="dash-chart-grid">
         <div class="dash-left">
@@ -40,19 +40,19 @@
         </div>
       </div>
     </section>
-    <section class="card glass" id="risksSection" style="grid-area: risks;">
+    <section class="card glass widget" id="risksSection" style="grid-column: span 4;">
       <h3>Risikoområder</h3>
       <div id="risks" class="list"></div>
     </section>
-    <section class="card glass" id="resourcesSection" style="grid-area: resources;">
+    <section class="card glass widget" id="resourcesSection" style="grid-column: span 4;">
       <h3>Ressourcer</h3>
       <div id="resources" class="list"></div>
     </section>
-    <section class="card glass" id="changelogSection" style="grid-area: changelog;">
+    <section class="card glass widget" id="changelogSection" style="grid-column: span 4;">
       <h3>Ændringslog</h3>
       <div id="changelog" class="list"></div>
     </section>
-    <section class="card glass" id="listSection" style="grid-area: list;">
+    <section class="card glass widget" id="listSection" style="grid-column: span 8;">
       <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <span>Aktiviteter</span>
         <span style="display:inline-flex;gap:8px;align-items:center;">
