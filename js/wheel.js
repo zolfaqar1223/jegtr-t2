@@ -296,16 +296,14 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
         itemsInSeg.forEach((it, idxInSeg) => {
           const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          // Use viewport-coordinates based on actual SVG rect
-          const rect = svg.getBoundingClientRect();
-          const centerX0 = rect.left + rect.width / 2;
-          const centerY0 = rect.top + rect.height / 2;
-          const px0 = rect.left + (bx / size) * rect.width;
-          const py0 = rect.top + (by / size) * rect.height;
-          // Apply the same transform as CSS (scale around center then translate)
-          const px = centerX0 + (px0 - centerX0) * zoom + panX;
-          const py = centerY0 + (py0 - centerY0) * zoom + panY;
-          createPersistentBubble(bubbleLayer, centerX0 + panX, centerY0 + panY, px, py, it, color, idxInSeg);
+          // Measure actual marker position after transforms
+          const svgRect = svg.getBoundingClientRect();
+          const centerX = svgRect.left + svgRect.width / 2;
+          const centerY = svgRect.top + svgRect.height / 2;
+          const markerRect = g.getBoundingClientRect();
+          const px = markerRect.left + markerRect.width / 2;
+          const py = markerRect.top + markerRect.height / 2;
+          createPersistentBubble(bubbleLayer, centerX, centerY, px, py, it, color, idxInSeg);
           // Emphasis on hover
           g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
           g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
@@ -387,7 +385,7 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const ux = dx / dist;
   const uy = dy / dist;
   // Offset just outside the week ring so it sits near the marker
-  const baseOffset = 70 + (offsetIndex||0)*22;
+  const baseOffset = 52 + (offsetIndex||0)*18;
   // target bubble center
   let bx = x + ux * baseOffset;
   let by = y + uy * baseOffset;
