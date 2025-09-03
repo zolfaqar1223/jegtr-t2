@@ -322,3 +322,4 @@
  TAB ...................................... Complete filename & cycle.
  SHIFT-TAB ...................... ESC-TAB   Complete filename & reverse cycle.
  ctrl-L ................................... Complete filename, list all.
+[33me06b842[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Customer: restrict to highlightMonths; sync next/list; aria label. Wheel: restrict DOM to selected months when provided; fade/blur/scale dim, glow for selected; transitions eased. CSS: smoother month-seg transitions

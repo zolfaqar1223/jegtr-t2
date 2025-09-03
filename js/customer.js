@@ -181,7 +181,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: true });
+    const restrict = Array.isArray(highlightMonths) && highlightMonths.length > 0;
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, highlightMonths, restrictMonths: restrict });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
