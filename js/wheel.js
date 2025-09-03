@@ -20,6 +20,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   const highlightMonths = Array.isArray(opts.highlightMonths) ? opts.highlightMonths : [];
   const restrictMonths = Boolean(opts.restrictMonths);
   const showBubbles = Boolean(opts.showBubbles);
+  const showQuarterBoxes = Boolean(opts.showQuarterBoxes);
   const panX = Number.isFinite(opts.panX) ? opts.panX : 0;
   const panY = Number.isFinite(opts.panY) ? opts.panY : 0;
   const zoom = Number.isFinite(opts.zoom) ? opts.zoom : 1;
@@ -294,8 +295,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       });
       svg.appendChild(g);
 
-      // Persistent info bubbles per activity in this segment (customer view only)
-      if (showBubbles) {
+      // Persistent info bubbles per activity (disabled when quarter boxes are used)
+      if (showBubbles && !showQuarterBoxes) {
         const mi = Math.floor((i * 12) / 52);
         const segInM = i - Math.round(mi * 52 / 12);
         const wk = Math.max(1, Math.min(5, Math.round((segInM * 4) / (52 / 12)) + 1));
@@ -316,6 +317,11 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         });
       }
     }
+  }
+
+  // Quarter boxes: one per quarter outside the wheel
+  if (showQuarterBoxes) {
+    renderQuarterBoxes(svg, bubbleLayer, items, { cx, cy, size, rWeekOuter }, { panX, panY, zoom });
   }
 }
 
@@ -452,4 +458,73 @@ function emphasizeBubble(svg, item, on) {
   const id = `bubble_${(item.id||item.title||'').toString().replace(/[^a-z0-9]/ig,'_')}`;
   const bubble = document.getElementById(id);
   if (bubble) bubble.style.boxShadow = on ? '0 22px 60px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.12)' : '0 18px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.08)';
+}
+
+// ====== Quarter boxes ======
+function renderQuarterBoxes(svg, layer, items, geom, transform) {
+  const wrap = layer.parentElement; if (!wrap) return;
+  const wrapCR = wrap.getBoundingClientRect();
+  const { cx, cy, size } = geom; const { panX, panY, zoom } = transform;
+  // Positions for Q1..Q4 boxes (relative to wrap), corners outside wheel
+  const boxW = Math.min(280, wrapCR.width * 0.26), boxPad = 12;
+  const columns = {
+    Q1: { left: wrapCR.right - boxW - 12, top: wrapCR.top + 12 },
+    Q2: { left: wrapCR.right - boxW - 12, top: wrapCR.bottom - 12 - 220 },
+    Q3: { left: wrapCR.left + 12, top: wrapCR.bottom - 12 - 220 },
+    Q4: { left: wrapCR.left + 12, top: wrapCR.top + 12 }
+  };
+  // Group items by quarter
+  const byQ = { Q1:[], Q2:[], Q3:[], Q4:[] };
+  items.forEach(it => { const q = it.quarter || inferQuarter(it.month); if (byQ[q]) byQ[q].push(it); });
+  Object.keys(byQ).forEach(q => {
+    const box = document.createElement('div');
+    box.className = 'event-bubble show';
+    box.style.minWidth = boxW + 'px';
+    box.style.maxWidth = boxW + 'px';
+    box.style.left = (columns[q].left - wrapCR.left) + 'px';
+    box.style.top = (columns[q].top - wrapCR.top) + 'px';
+    // Title
+    const title = `<div class="heading" style="margin-bottom:6px;">${q}</div>`;
+    // List
+    const list = byQ[q].sort((a,b)=> (a.month===b.month? a.week-b.week: MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month))).map(it => {
+      const color = CAT_COLORS[it.cat] || 'var(--accent)';
+      const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+      return `<div class="meta" style="display:flex;justify-content:space-between;gap:8px;margin:4px 0;flex-wrap:wrap;">
+        <span style="font-weight:600;">${it.title}</span>
+        <span>Uge ${it.isoWeek||it.week}${dateStr?` · ${dateStr}`:''}</span>
+        <span class="badge cat" style="border-color:${color};color:${color};">${it.cat}</span>
+        <span class="badge status">${it.status||'Planlagt'}</span>
+      </div>`;
+    }).join('');
+    box.innerHTML = title + list;
+    wrap.appendChild(box);
+    // Draw single quarter thread from quadrant midpoint to box edge
+    const a1 = { Q1: Math.PI*7/4, Q2: Math.PI*1/4, Q3: Math.PI*3/4, Q4: Math.PI*5/4 }[q];
+    const [qx, qy] = polar(cx, cy, size*0.30, a1);
+    // Transform to viewport (same as CSS transform)
+    const rect = svg.getBoundingClientRect();
+    const cX = rect.left + rect.width/2, cY = rect.top + rect.height/2;
+    const qx0 = cX + (qx - cX)*zoom + panX;
+    const qy0 = cY + (qy - cY)*zoom + panY;
+    const bcr = box.getBoundingClientRect();
+    const x2 = Math.max(bcr.left, Math.min(bcr.right, qx0));
+    const y2 = Math.max(bcr.top, Math.min(bcr.bottom, qy0));
+    const line = document.createElement('div');
+    line.className = 'event-thread';
+    line.style.left = (qx0 - wrapCR.left) + 'px';
+    line.style.top  = (qy0 - wrapCR.top) + 'px';
+    line.style.width = Math.hypot(x2 - qx0, y2 - qy0) + 'px';
+    line.style.transformOrigin = '0 0';
+    line.style.transform = `rotate(${Math.atan2(y2-qy0, x2-qx0)*180/Math.PI}deg)`;
+    wrap.appendChild(line);
+  });
+}
+
+function inferQuarter(monthName) {
+  const m = MONTHS.indexOf(monthName);
+  if (m < 0) return 'Q1';
+  if (m < 3) return 'Q1';
+  if (m < 6) return 'Q2';
+  if (m < 9) return 'Q3';
+  return 'Q4';
 }

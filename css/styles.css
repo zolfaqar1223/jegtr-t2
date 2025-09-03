@@ -721,6 +721,7 @@ body.customer #listSection { grid-area: acts; }
   pointer-events: none;
   z-index: 55;
 }
+.quarter-box { min-width: 240px; max-width: 320px; }
 
 @media (max-width: 640px) {
   .event-bubble {
