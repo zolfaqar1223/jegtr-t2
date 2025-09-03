@@ -282,8 +282,9 @@ function setupShareModal() {
   let shareSelection = new Set();
   let selectedQuarters = new Set();
 
-  // Fallback: hvis kvartal‑chips ikke findes i HTML (cache/ældre markup), så opret dem dynamisk
-  if (!shareQuartersEl && shareList && shareList.parentElement) {
+  function ensureQuarterChips() {
+    if (shareQuartersEl) return shareQuartersEl;
+    if (!shareList || !shareList.parentElement) return null;
     const host = shareList.parentElement;
     const row = document.createElement('div');
     row.id = 'shareQuarters';
@@ -297,7 +298,10 @@ function setupShareModal() {
     });
     host.insertBefore(row, shareList);
     shareQuartersEl = row;
+    return shareQuartersEl;
   }
+  // build once at setup
+  ensureQuarterChips();
 
   function renderShareList(q = '') {
     if (!shareList) return;
@@ -470,6 +474,8 @@ function setupShareModal() {
     const m = document.getElementById('shareModal');
     if (!m) return;
     m.style.display = 'flex';
+    // make sure quarter chips exist even if HTML was cached
+    ensureQuarterChips();
     openShare();
   }
 
