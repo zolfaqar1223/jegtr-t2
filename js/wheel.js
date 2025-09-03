@@ -383,37 +383,38 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
   wrap.appendChild(bubble);
   wrap.appendChild(thread);
-  // Decide preferred side based on marker relative to center
-  const rightSide = x >= cx;
-  const aboveCenter = y < cy;
-  const radius = 120; // distance from marker to bubble center
-  const pref = [
-    {dx: rightSide ? radius : -radius, dy: -24},
-    {dx: rightSide ? radius : -radius, dy: 24},
-    {dx: rightSide ? radius + 20 : -(radius + 20), dy: 0},
-    {dx: rightSide ? radius : -radius, dy: (aboveCenter ? 48 : -48)}
-  ];
-  const rect = wrap.getBoundingClientRect();
-  let placed = false;
-  for (const p of pref) {
-    const left = x + p.dx;
-    const top = y + p.dy + (offsetIndex||0)*24;
-    bubble.style.left = left + 'px';
-    bubble.style.top = top + 'px';
-    const bcr = bubble.getBoundingClientRect();
-    if (bcr.left >= rect.left + 8 && bcr.right <= rect.right - 8 && bcr.top >= rect.top + 8 && bcr.bottom <= rect.bottom - 8) { placed = true; break; }
-  }
-  if (!placed) { bubble.style.left = (x + (rightSide?120:-280)) + 'px'; bubble.style.top = (y - 20) + 'px'; }
-  // Thread
-  const bcr2 = bubble.getBoundingClientRect();
+  // Radial placement from center towards outside
+  const dx = x - cx;
+  const dy = y - cy;
+  const dist = Math.hypot(dx, dy) || 1;
+  const ux = dx / dist;
+  const uy = dy / dist;
+  const baseOffset = 100 + (offsetIndex||0)*24;
+  // target bubble center
+  let bx = x + ux * baseOffset;
+  let by = y + uy * baseOffset;
+  // measure and clamp inside wrap
+  bubble.style.left = (bx - 140) + 'px';
+  bubble.style.top = (by - 40) + 'px';
   const wrapCR = wrap.getBoundingClientRect();
-  const x1 = x; const y1 = y;
-  const x2 = Math.max(bcr2.left - wrapCR.left, Math.min(bcr2.right - wrapCR.left, x1 + 1));
-  const y2 = Math.max(bcr2.top - wrapCR.top, Math.min(bcr2.bottom - wrapCR.top, y1));
+  const bcr = bubble.getBoundingClientRect();
+  const bw = bcr.width, bh = bcr.height;
+  let left = bx - bw/2;
+  let top = by - bh/2;
+  const margin = 8;
+  left = Math.max(wrapCR.left + margin, Math.min(wrapCR.right - margin - bw, left));
+  top = Math.max(wrapCR.top + margin, Math.min(wrapCR.bottom - margin - bh, top));
+  bubble.style.left = (left - wrapCR.left) + 'px';
+  bubble.style.top = (top - wrapCR.top) + 'px';
+  // Thread from marker to nearest edge of bubble
+  const finalBCR = bubble.getBoundingClientRect();
+  const x1 = x, y1 = y;
+  const x2 = Math.max(finalBCR.left, Math.min(finalBCR.right, x1));
+  const y2 = Math.max(finalBCR.top, Math.min(finalBCR.bottom, y1));
   const len = Math.hypot(x2 - x1, y2 - y1);
   const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-  thread.style.left = x1 + 'px';
-  thread.style.top = y1 + 'px';
+  thread.style.left = (x1 - wrapCR.left) + 'px';
+  thread.style.top = (y1 - wrapCR.top) + 'px';
   thread.style.width = len + 'px';
   thread.style.transformOrigin = '0 0';
   thread.style.transform = `rotate(${angle}deg)`;
