@@ -69,6 +69,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   bubbleLayer._rects = [];
   bubbleLayer._leftY = 12;
   bubbleLayer._rightY = 12;
+  bubbleLayer._leftRects = [];
+  bubbleLayer._rightRects = [];
   const cw = container ? container.getBoundingClientRect().width : 0;
   const size = Math.min(cw || svg.clientWidth || 700, 1000);
   const cx = size / 2;
@@ -382,7 +384,7 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
   wrap.appendChild(bubble);
   wrap.appendChild(thread);
-  // Side stacking layout
+  // Side stacking layout (no-overlap, roughly aligned with marker Y)
   const wrapCR = wrap.getBoundingClientRect();
   // pre-measure bubble to know width/height
   bubble.style.left = '-9999px'; bubble.style.top = '-9999px';
@@ -390,12 +392,41 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const bw = bcrTest.width || 240; const bh = bcrTest.height || 80;
   const margin = 12; const gap = 10;
   const isRight = x >= cx;
-  // Use layer counters prepared at render start
-  if (typeof wrap._leftY !== 'number') wrap._leftY = 12;
-  if (typeof wrap._rightY !== 'number') wrap._rightY = 12;
+  // Use layer registries
+  wrap._leftRects = wrap._leftRects || [];
+  wrap._rightRects = wrap._rightRects || [];
   let left, top;
-  if (isRight) { left = wrapCR.right - margin - bw; top = wrap._rightY; wrap._rightY = top + bh + gap; }
-  else { left = wrapCR.left + margin; top = wrap._leftY; wrap._leftY = top + bh + gap; }
+  const targetTop = Math.round(y - bh / 2);
+  if (isRight) {
+    left = wrapCR.right - margin - bw;
+    const col = wrap._rightRects;
+    // start at preferred position, then push down to avoid overlaps
+    top = Math.max(targetTop, (col.length ? col[col.length - 1].bottom + gap : wrapCR.top + margin));
+    // clamp bottom; if clamped, try shifting up without overlapping previous
+    if (top + bh > wrapCR.bottom - margin) {
+      top = Math.min(targetTop, wrapCR.bottom - margin - bh);
+      // walk upwards to avoid overlapping previous rects
+      for (let i = col.length - 1; i >= 0; i--) {
+        const prev = col[i];
+        if (top < prev.bottom + gap) top = prev.top - gap - bh; else break;
+      }
+      top = Math.max(wrapCR.top + margin, top);
+    }
+    col.push({ left, top, right: left + bw, bottom: top + bh });
+  } else {
+    left = wrapCR.left + margin;
+    const col = wrap._leftRects;
+    top = Math.max(targetTop, (col.length ? col[col.length - 1].bottom + gap : wrapCR.top + margin));
+    if (top + bh > wrapCR.bottom - margin) {
+      top = Math.min(targetTop, wrapCR.bottom - margin - bh);
+      for (let i = col.length - 1; i >= 0; i--) {
+        const prev = col[i];
+        if (top < prev.bottom + gap) top = prev.top - gap - bh; else break;
+      }
+      top = Math.max(wrapCR.top + margin, top);
+    }
+    col.push({ left, top, right: left + bw, bottom: top + bh });
+  }
   // Clamp inside container vertically
   top = Math.max(wrapCR.top + margin, Math.min(wrapCR.bottom - margin - bh, top));
   bubble.style.left = (left - wrapCR.left) + 'px';
