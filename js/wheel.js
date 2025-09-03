@@ -378,39 +378,56 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
   wrap.appendChild(bubble);
   wrap.appendChild(thread);
-  // Radial placement from center towards outside
+  // Radial placement from center towards outside with collision avoidance
   const dx = x - cx;
   const dy = y - cy;
   const dist = Math.hypot(dx, dy) || 1;
   const ux = dx / dist;
   const uy = dy / dist;
-  // Offset just outside the week ring so it sits near the marker
-  const baseOffset = 52 + (offsetIndex||0)*18;
-  // target bubble center
-  let bx = x + ux * baseOffset;
-  let by = y + uy * baseOffset;
-  // measure and clamp inside wrap
-  bubble.style.left = (bx - 140) + 'px';
-  bubble.style.top = (by - 40) + 'px';
   const wrapCR = wrap.getBoundingClientRect();
-  const bcr = bubble.getBoundingClientRect();
-  const bw = bcr.width, bh = bcr.height;
-  let left = bx - bw/2;
-  let top = by - bh/2;
+  // pre-measure bubble size
+  bubble.style.left = '-9999px'; bubble.style.top = '-9999px';
+  const bcr0 = bubble.getBoundingClientRect();
+  const bw = bcr0.width || 240; const bh = bcr0.height || 80;
+  const tx = -uy, ty = ux; // tangent unit
+  const baseR = 64 + (offsetIndex||0)*18;
+  const spread = Math.max(26, Math.round(bh*0.6));
   const margin = 8;
-  left = Math.max(wrapCR.left + margin, Math.min(wrapCR.right - margin - bw, left));
-  top = Math.max(wrapCR.top + margin, Math.min(wrapCR.bottom - margin - bh, top));
-  bubble.style.left = (left - wrapCR.left) + 'px';
-  bubble.style.top = (top - wrapCR.top) + 'px';
-  // Thread from marker to nearest edge of bubble
-  const finalBCR = bubble.getBoundingClientRect();
+  // Build registry of already placed bubbles in this layer
+  const layer = wrap.querySelector('.bubble-layer') || wrap;
+  layer._rects = layer._rects || [];
+  const rects = layer._rects;
+  function hit(r){ return rects.some(a => !(r.right < a.left || r.left > a.right || r.bottom < a.top || r.top > a.bottom)); }
+  let finalRect = null;
+  for (let ring = 0; ring < 4 && !finalRect; ring++) {
+    const r = baseR + ring*22;
+    const offs = [0,1,-1,2,-2,3,-3,4,-4];
+    for (const k of offs) {
+      const cxB = x + ux*r + tx*(k*spread);
+      const cyB = y + uy*r + ty*(k*spread);
+      let left = cxB - bw/2, top = cyB - bh/2;
+      left = Math.max(wrapCR.left+margin, Math.min(wrapCR.right-margin-bw, left));
+      top  = Math.max(wrapCR.top+margin,  Math.min(wrapCR.bottom-margin-bh, top));
+      const cand = { left, top, right: left+bw, bottom: top+bh };
+      if (!hit(cand)) { finalRect = cand; break; }
+    }
+  }
+  if (!finalRect) {
+    const left = Math.max(wrapCR.left+margin, Math.min(wrapCR.right-margin-bw, x + 20));
+    const top  = Math.max(wrapCR.top+margin,  Math.min(wrapCR.bottom-margin-bh, y - bh/2));
+    finalRect = { left, top, right: left+bw, bottom: top+bh };
+  }
+  bubble.style.left = (finalRect.left - wrapCR.left) + 'px';
+  bubble.style.top  = (finalRect.top  - wrapCR.top)  + 'px';
+  rects.push(finalRect);
+  // Thread: nearest point on finalRect
   const x1 = x, y1 = y;
-  const x2 = Math.max(finalBCR.left, Math.min(finalBCR.right, x1));
-  const y2 = Math.max(finalBCR.top, Math.min(finalBCR.bottom, y1));
-  const len = Math.hypot(x2 - x1, y2 - y1);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  const x2 = Math.max(finalRect.left, Math.min(finalRect.right, x1));
+  const y2 = Math.max(finalRect.top,  Math.min(finalRect.bottom, y1));
+  const len = Math.hypot(x2-x1, y2-y1);
+  const angle = Math.atan2(y2-y1, x2-x1)*180/Math.PI;
   thread.style.left = (x1 - wrapCR.left) + 'px';
-  thread.style.top = (y1 - wrapCR.top) + 'px';
+  thread.style.top  = (y1 - wrapCR.top)  + 'px';
   thread.style.width = len + 'px';
   thread.style.transformOrigin = '0 0';
   thread.style.transform = `rotate(${angle}deg)`;
