@@ -296,9 +296,12 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
         const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
         itemsInSeg.forEach((it, idxInSeg) => {
           const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          const px = bx * zoom + panX;
-          const py = by * zoom + panY;
-          createPersistentBubble(bubbleLayer, cx * zoom + panX, cy * zoom + panY, px, py, it, color, idxInSeg);
+          // Convert SVG coords (bx,by) to screen coords with zoom around center and pan
+          const cxScreen = cx + panX;
+          const cyScreen = cy + panY;
+          const px = cx + (bx - cx) * zoom + panX;
+          const py = cy + (by - cy) * zoom + panY;
+          createPersistentBubble(bubbleLayer, cxScreen, cyScreen, px, py, it, color, idxInSeg);
           // Emphasis on hover
           g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
           g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
@@ -383,7 +386,7 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   let placed = false;
   for (const p of pref) {
     const left = x + p.dx;
-    const top = y + p.dy + (offsetIndex||0)*22;
+    const top = y + p.dy + (offsetIndex||0)*24;
     bubble.style.left = left + 'px';
     bubble.style.top = top + 'px';
     const bcr = bubble.getBoundingClientRect();
