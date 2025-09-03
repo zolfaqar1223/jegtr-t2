@@ -703,6 +703,7 @@ body.customer #listSection { grid-area: acts; }
   transform: translateY(4px) scale(0.98);
   transition: opacity 180ms ease, transform 200ms ease, left 200ms ease, top 200ms ease;
   z-index: 60;
+  pointer-events: auto;
 }
 .event-bubble.show {
   opacity: 1;

@@ -65,6 +65,8 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     container.appendChild(bubbleLayer);
   }
   bubbleLayer.innerHTML = '';
+  // reset registry used for collision management in this render
+  bubbleLayer._rects = [];
   const cw = container ? container.getBoundingClientRect().width : 0;
   const size = Math.min(cw || svg.clientWidth || 700, 1000);
   const cx = size / 2;
@@ -395,8 +397,8 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const margin = 8;
   // Build registry of already placed bubbles in this layer
   const layer = wrap.querySelector('.bubble-layer') || wrap;
-  layer._rects = layer._rects || [];
-  const rects = layer._rects;
+  // Use bubble layer registry which was reset at the start of draw
+  const rects = (layer._rects = layer._rects || []);
   function hit(r){ return rects.some(a => !(r.right < a.left || r.left > a.right || r.bottom < a.top || r.top > a.bottom)); }
   let finalRect = null;
   for (let ring = 0; ring < 4 && !finalRect; ring++) {
