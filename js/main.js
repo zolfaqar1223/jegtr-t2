@@ -705,8 +705,8 @@ document.addEventListener('DOMContentLoaded', () => {
   settings = readSettings();
   if (settings.activeCategory) activeCategory = settings.activeCategory;
   if (settings.activeStatus) activeStatus = settings.activeStatus;
-  // Start altid centreret og en tand zoomet ud ved første visning
-  zoomLevel = 0.9;
+  // Start altid centreret og zoomet så hele hjulet er synligt
+  zoomLevel = 0.8;
   panX = 0;
   panY = 0;
   if (typeof settings.activitiesExpanded === 'undefined') settings.activitiesExpanded = true;

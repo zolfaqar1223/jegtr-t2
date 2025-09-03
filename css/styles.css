@@ -197,6 +197,8 @@ button.ghost:hover {
   min-height: 0;
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
+  position: relative;
+  z-index: 2;
 }
 
 h3 {
@@ -275,9 +277,11 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 520px;
+  min-height: 280px;
   grid-area: wheel;
   padding: 24px; /* luft inde i widget */
+  overflow: hidden;
+  position: relative;
 }
 #formSection { grid-area: form; }
 #listSection { grid-area: acts; }
@@ -403,6 +407,9 @@ svg {
   display: block;
   margin: 0 auto;
   max-width: calc(100% - 40px);
+  pointer-events: auto;
+  position: relative;
+  z-index: 0;
 }
 
 .list {
@@ -430,6 +437,8 @@ svg {
   gap: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
   transition: transform 160ms ease, box-shadow 160ms ease, background 200ms ease, border-color 200ms ease;
+  position: relative;
+  z-index: 1;
 }
 
 .item:hover {
@@ -561,7 +570,7 @@ body.customer #nextSection { grid-area: next; }
 body.customer .wheel-wrap { grid-area: wheel; }
 body.customer #listSection { grid-area: acts; }
 /* Bigger wheel on customer */
-.customer .wheel-wrap { min-height: 520px; }
+.customer .wheel-wrap { min-height: 280px; overflow: hidden; position: relative; }
 /* Ensure wheel SVG scales large on customer view */
 .customer .wheel-wrap #wheel {
   width: 100%;
