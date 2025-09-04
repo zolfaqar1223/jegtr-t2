@@ -44,7 +44,8 @@ let lastMouseY = 0;
 
 // DOM‑cache
 const dateInput = document.getElementById('date');
-const timeInput = document.getElementById('time');
+const timeFromInput = document.getElementById('timeFrom');
+const timeToInput = document.getElementById('timeTo');
 const titleInput = document.getElementById('title');
 const ownerInput = document.getElementById('owner');
 const categorySelect = document.getElementById('category');
@@ -155,14 +156,21 @@ async function saveItem() {
   // Udled måned/uge ud fra valgt dato eller brug dags dato
   const baseDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : new Date();
   // apply time if provided (HH:MM)
-  if (timeInput && timeInput.value) {
-    const [hh, mm] = timeInput.value.split(':').map(n=>parseInt(n,10));
-    if (Number.isFinite(hh) && Number.isFinite(mm)) {
-      baseDate.setHours(hh);
-      baseDate.setMinutes(mm);
-      baseDate.setSeconds(0);
-      baseDate.setMilliseconds(0);
-    }
+  // read time range
+  let timeFrom = null, timeTo = null;
+  if (timeFromInput && timeFromInput.value) {
+    const [fh, fm] = timeFromInput.value.split(':').map(n=>parseInt(n,10));
+    if (Number.isFinite(fh) && Number.isFinite(fm)) timeFrom = { h: fh, m: fm };
+  }
+  if (timeToInput && timeToInput.value) {
+    const [th, tm] = timeToInput.value.split(':').map(n=>parseInt(n,10));
+    if (Number.isFinite(th) && Number.isFinite(tm)) timeTo = { h: th, m: tm };
+  }
+  if (timeFrom) {
+    baseDate.setHours(timeFrom.h);
+    baseDate.setMinutes(timeFrom.m);
+    baseDate.setSeconds(0);
+    baseDate.setMilliseconds(0);
   }
   const month = MONTHS[baseDate.getMonth()];
   const day = baseDate.getDate();
@@ -204,7 +212,7 @@ async function saveItem() {
       } else {
         attachments = Array.isArray(items[idx].attachments) ? items[idx].attachments : [];
       }
-      items[idx] = { ...items[idx], month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, attachments, updatedAt: new Date().toISOString() };
+      items[idx] = { ...items[idx], month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, timeFrom: timeFromInput?.value || '', timeTo: timeToInput?.value || '', attachments, updatedAt: new Date().toISOString() };
       const after = { ...items[idx] };
       logChange(`Redigerede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'edit', id: editingId, before, after });
     }
@@ -215,7 +223,7 @@ async function saveItem() {
       const fileList = Array.from(filesInput.files);
       attachments = await readFilesAsDataUrls(fileList);
     }
-    const item = { id, month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, attachments, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: (settings && settings.user) || 'System' };
+    const item = { id, month, week, isoWeek, year, quarter, title, owner, cat, status, note, date: savedDateIso, timeFrom: timeFromInput?.value || '', timeTo: timeToInput?.value || '', attachments, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: (settings && settings.user) || 'System' };
     items.push(item);
     logChange(`Tilføjede aktivitet: ${title}${owner ? ` · ${owner}` : ''}`, { type: 'create', id, after: item });
   }

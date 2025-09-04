@@ -93,7 +93,9 @@ export function renderList(listEl, items, callbacks) {
     meta.appendChild(badge);
     meta.appendChild(statusBadge);
     const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
-    const timeStr = it.date ? new Date(it.date).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' }) : '';
+    const timeFrom = (it.timeFrom||'').trim();
+    const timeTo = (it.timeTo||'').trim();
+    const timeStr = timeFrom && timeTo ? `${timeFrom}-${timeTo}` : (it.date ? new Date(it.date).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' }) : '');
     const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
     const qy = it.quarter && it.year ? ` · ${it.quarter} · ${it.year}` : '';
     const owner = it.owner ? ` · Ansvarlig: ${it.owner}` : '';

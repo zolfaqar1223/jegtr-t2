@@ -64,8 +64,11 @@ function renderListReadOnly(listEl, itemsToShow) {
       const color = CAT_COLORS[it.cat] || 'var(--accent)';
       const badge = `<span class=\"badge cat\" style=\"background:rgba(255,255,255,0.06);border-color:${color};color:${color};margin-right:10px;\">${it.cat}</span>`;
       const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : new Date().toLocaleDateString('da-DK');
+      const timeFrom = (it.timeFrom||'').trim();
+      const timeTo = (it.timeTo||'').trim();
+      const timeStr = timeFrom && timeTo ? `${timeFrom}-${timeTo}` : '';
       const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
-      meta.innerHTML = `${badge}${it.month}${weekStr} · ${dateStr}`;
+      meta.innerHTML = `${badge}${it.month}${weekStr} · ${dateStr}${timeStr?` · ${timeStr}`:''}`;
       const note = document.createElement('div');
       note.className = 'note';
       note.textContent = (it.note && it.note.trim().length) ? it.note : 'Ingen noter tilføjet endnu';
@@ -437,7 +440,10 @@ function renderNext(arr) {
   const color = CAT_COLORS[it.cat] || 'var(--accent)';
   const weekStr = it.isoWeek ? `Uge ${it.isoWeek}` : `Uge ${it.week}`;
   const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+  const tf = (it.timeFrom||'').trim();
+  const tt = (it.timeTo||'').trim();
+  const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
   const noteText = (it.note && it.note.trim().length) ? it.note : 'Ingen noter tilføjet endnu';
   const attachCnt = (it.attachments && it.attachments.length) ? `<span class=\"badge tag\">${it.attachments.length} fil${it.attachments.length>1?'er':''}</span>` : '';
-  nextBox.innerHTML = `<div class=\"item-content\"><strong>${it.title}</strong><div class=\"meta\"><span class=\"badge cat\" style=\"border-color:${color};color:${color};\">${it.cat}</span> ${it.month} · ${weekStr} · ${dateStr} ${attachCnt}</div><div class=\"note\">${noteText}</div></div>`;
+  nextBox.innerHTML = `<div class=\"item-content\"><strong>${it.title}</strong><div class=\"meta\"><span class=\"badge cat\" style=\"border-color:${color};color:${color};\">${it.cat}</span> ${it.month} · ${weekStr} · ${dateStr}${tRange} ${attachCnt}</div><div class=\"note\">${noteText}</div></div>`;
 }
