@@ -478,7 +478,6 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
   const byQ = { Q1:[], Q2:[], Q3:[], Q4:[] };
   items.forEach(it => { const q = it.quarter || inferQuarter(it.month); if (byQ[q]) byQ[q].push(it); });
   Object.keys(byQ).forEach(q => {
-    if (isCustomer && q !== 'Q2') return; // On customer view, only show Q2 bubble
     const box = document.createElement('div');
     box.className = `event-bubble show quarter-box qbox-${q}`;
     box.style.minWidth = boxW + 'px';
