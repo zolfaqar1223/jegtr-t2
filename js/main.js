@@ -656,6 +656,7 @@ function render() {
       titleInput.value = item.title;
       categorySelect.value = item.cat;
       if (statusSelect) statusSelect.value = item.status || 'Planlagt';
+      if (ownerInput) ownerInput.value = item.owner || '';
       notesInput.value = item.note || '';
       if (dateInput) dateInput.value = '';
       // Prefill date and time range if present
