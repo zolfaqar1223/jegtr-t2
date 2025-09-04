@@ -93,8 +93,10 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   // Midtertekst
   const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   t1.setAttribute('x', cx);
-  t1.setAttribute('y', cy - 4);
+  t1.setAttribute('y', cy);
   t1.setAttribute('text-anchor', 'middle');
+  t1.setAttribute('dominant-baseline', 'middle');
+  t1.setAttribute('alignment-baseline', 'middle');
   t1.setAttribute('font-size', '16');
   t1.setAttribute('font-weight', '600');
   t1.setAttribute('fill', '#ffffff');
@@ -527,14 +529,15 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     // Title
     const title = `<div class="heading" style="margin-bottom:6px;">${q}</div>`;
     // Unified Q2-like layout with separators between activities
-    const rows = (byQ[q] || []).slice().sort((a,b)=> {
+    const arr = (byQ[q] || []).slice().sort((a,b)=> {
       const ma = MONTHS.indexOf(a.month), mb = MONTHS.indexOf(b.month);
       if (ma !== mb) return ma - mb;
       if ((a.week||0) !== (b.week||0)) return (a.week||0) - (b.week||0);
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
       return da - db;
-    }).map((it, idx) => {
+    });
+    let rows = arr.map((it, idx) => {
       const color = CAT_COLORS[it.cat] || 'var(--accent)';
       const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
       const tf = (it.timeFrom||'').trim();
@@ -550,6 +553,9 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
         </div>
       </div>`;
     }).join('');
+    if (arr.length === 0) {
+      rows = `<div class="empty">Ingen aktiviteter</div>`;
+    }
     box.innerHTML = title + rows;
     wrap.appendChild(box);
     // Draw thread for this quarter box (only for rendered ones)
