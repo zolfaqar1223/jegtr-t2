@@ -485,10 +485,12 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     box.className = `event-bubble show quarter-box qbox-${q}`;
     box.style.minWidth = boxW + 'px';
     box.style.maxWidth = boxW + 'px';
-    if (q === 'Q2' && isCustomer) {
-      // Pin to bottom-right corner in customer view
-      box.style.right = '12px';
-      box.style.bottom = '12px';
+    if (isCustomer) {
+      // Pin each quarter to its respective corner
+      if (q === 'Q1') { box.style.right = '12px'; box.style.top = '12px'; }
+      else if (q === 'Q2') { box.style.right = '12px'; box.style.bottom = '12px'; }
+      else if (q === 'Q3') { box.style.left = '12px'; box.style.bottom = '12px'; }
+      else /* Q4 */ { box.style.left = '12px'; box.style.top = '12px'; }
     } else {
       box.style.left = (columns[q].left - wrapCR.left) + 'px';
       box.style.top = (columns[q].top - wrapCR.top) + 'px';
