@@ -176,8 +176,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    // Stable render; use quarter boxes for clean grouped display (uden zoom/pan)
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true });
+    // Stable render; use quarter boxes for clean grouped display med statisk zoom for centrering
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, zoom: DEFAULT_ZOOM, panX: 0, panY: 0 });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
@@ -192,9 +192,8 @@ function render(focusedMonth = null) {
       wheelSvg.appendChild(txt);
     }
   }
-  // Statisk let zoom-ud for at matche main (centreret)
-  wheelSvg.style.transformOrigin = '50% 50%';
-  wheelSvg.style.transform = `scale(${DEFAULT_ZOOM})`;
+  // Ingen ekstra CSS-transform – zoom håndteres i drawWheel, så bobler/quarter boxes følger med
+  wheelSvg.style.transform = '';
   const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning
