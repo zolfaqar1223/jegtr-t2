@@ -644,6 +644,14 @@ body.customer #listSection { grid-area: acts; }
   height: auto;
 }
 
+/* Customer readability improvements */
+body.customer h1 { font-size: 26px; }
+.customer .group-title { font-size: 16px; }
+.customer .item { padding: 18px 20px; }
+.customer .item strong { font-size: 15px; }
+.customer .item .meta, .customer .item .note { font-size: 13px; }
+.customer .item { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22); }
+
 /* Enlarge non-bubble text for customer view for readability */
 body.customer h1 { font-size: 26px; }
 .customer .group-title { font-size: 16px; }

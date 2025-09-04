@@ -300,6 +300,20 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
           requestAnimationFrame(() => callbacks.openMonth(monthName));
         }
       });
+      // Quick hover detail without click
+      g.addEventListener('mouseenter', () => {
+        const approxMonthIndex = Math.floor((i * 12) / 52);
+        const monthName = MONTHS[approxMonthIndex];
+        const segInMonth = i - Math.round(approxMonthIndex * 52 / 12);
+        const weekNum = Math.max(1, Math.min(5, Math.round((segInMonth * 4) / (52 / 12)) + 1));
+        const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === approxMonthIndex && x.week === weekNum);
+        if (itemsInSeg.length === 0) return;
+        const color = weekColors[i] || 'var(--accent)';
+        const rect = svg.getBoundingClientRect();
+        const px = rect.left + rect.width/2; // simple anchor near center
+        const py = rect.top + rect.height/2;
+        createPersistentBubble(svg.parentElement, rect.left + rect.width/2, rect.top + rect.height/2, bx, by, itemsInSeg[0], color, 0);
+      });
       svg.appendChild(g);
 
       // Persistent info bubbles per activity (disabled when quarter boxes are used)
