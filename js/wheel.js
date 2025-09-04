@@ -140,6 +140,19 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   // Månedsringe og highligths
   const useHighlight = Array.isArray(highlightMonths) && highlightMonths.length > 0;
   const hlSet = new Set(useHighlight ? highlightMonths : []);
+  // Year presence per month (customer view only)
+  const monthYearPresence = new Array(12).fill(null).map(() => ({ has2025: false, has2026: false }));
+  try {
+    items.forEach(it => {
+      if (!it || !it.date) return;
+      const d = new Date(it.date);
+      const y = d.getFullYear();
+      const mi = MONTHS.indexOf(it.month);
+      if (mi < 0) return;
+      if (y === 2026) monthYearPresence[mi].has2026 = true;
+      if (y === 2025) monthYearPresence[mi].has2025 = true;
+    });
+  } catch {}
   for (let m = 0; m < 12; m++) {
     const monthName = MONTHS[m];
     const monthSelected = !useHighlight || hlSet.has(monthName);
@@ -221,6 +234,48 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     if (isHl) txt.setAttribute('font-weight', '700');
     txt.addEventListener('click', () => callbacks.openMonth(monthName));
     svg.appendChild(txt);
+    // Year markers (customer view only)
+    if (isCustomerView) {
+      const mid = (a1 + a2) / 2;
+      const has26 = monthYearPresence[m].has2026;
+      const has25 = monthYearPresence[m].has2025 && !has26; // prefer showing 2026 if both exist
+      if (has26 || has25) {
+        const rStart = rMonthOuter + 6;
+        const rEnd = rMonthOuter + 20;
+        const rText = rMonthOuter + 30;
+        const [lx1, ly1] = polar(cx, cy, rStart, mid);
+        const [lx2, ly2] = polar(cx, cy, rEnd, mid);
+        const [tx2, ty2] = polar(cx, cy, rText, mid);
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', lx1);
+        tick.setAttribute('y1', ly1);
+        tick.setAttribute('x2', lx2);
+        tick.setAttribute('y2', ly2);
+        tick.setAttribute('stroke-linecap', 'round');
+        tick.setAttribute('stroke-width', '1');
+        tick.setAttribute('stroke', has26 ? 'rgba(255,255,255,0.38)' : 'rgba(255,255,255,0.60)');
+        tick.setAttribute('opacity', has26 ? '0.40' : '0.70');
+        tick.classList.add('year-tick');
+        tick.style.transition = 'opacity 220ms ease, stroke 220ms ease';
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', tx2);
+        label.setAttribute('y', ty2);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '10');
+        label.setAttribute('fill', has26 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.78)');
+        label.setAttribute('opacity', has26 ? '0.55' : '0.85');
+        label.textContent = has26 ? '2026' : '2025';
+        label.classList.add('year-label');
+        label.style.transition = 'opacity 220ms ease';
+        // Hover emphasis on month
+        const hoverIn = () => { tick.setAttribute('opacity', '0.95'); label.setAttribute('opacity', '0.95'); };
+        const hoverOut = () => { tick.setAttribute('opacity', has26 ? '0.40' : '0.70'); label.setAttribute('opacity', has26 ? '0.55' : '0.85'); };
+        path.addEventListener('mouseenter', hoverIn);
+        path.addEventListener('mouseleave', hoverOut);
+        svg.appendChild(tick);
+        svg.appendChild(label);
+      }
+    }
   }
   // After drawing all months, mark focus quarters when highlightMonths exist
   if (Array.isArray(highlightMonths) && highlightMonths.length > 0) {
