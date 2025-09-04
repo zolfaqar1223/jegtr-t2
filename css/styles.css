@@ -496,8 +496,8 @@ svg {
   border-radius: 14px;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 1fr 320px;
-  grid-template-areas: "content note";
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "content actions";
   align-items: start;
   column-gap: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
@@ -518,7 +518,7 @@ svg {
   min-width: 0;
   grid-area: content;
 }
-.note-box {
+.customer .note-box {
   grid-area: note;
   align-self: stretch;
   min-width: 0;
@@ -528,10 +528,16 @@ svg {
   padding: 10px 12px;
   color: var(--text);
 }
-.note-box .note { margin: 0; font-size: 11px; opacity: .95; }
+.customer .note-box .note { margin: 0; font-size: 11px; opacity: .95; }
 
 @media (max-width: 900px) {
-  .item { grid-template-columns: 1fr; grid-template-areas: "content" "note"; }
+  .customer .item { grid-template-columns: 1fr; grid-template-areas: "content" "note"; }
+}
+
+/* Customer-specific: two-column layout with right-side note box */
+.customer .item {
+  grid-template-columns: 1fr 320px;
+  grid-template-areas: "content note";
 }
 
 .item strong {
