@@ -497,18 +497,46 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     }
     // Title
     const title = `<div class="heading" style="margin-bottom:6px;">${q}</div>`;
-    // List
-    const list = byQ[q].sort((a,b)=> (a.month===b.month? a.week-b.week: MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month))).map(it => {
-      const color = CAT_COLORS[it.cat] || 'var(--accent)';
-      const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
-      return `<div class="meta" style="display:flex;justify-content:space-between;gap:8px;margin:4px 0;flex-wrap:wrap;">
-        <span style="font-weight:600;">${it.title}</span>
-        <span>Uge ${it.isoWeek||it.week}${dateStr?` · ${dateStr}`:''}</span>
-        <span class="badge cat" style="border-color:${color};color:${color};">${it.cat}</span>
-        <span class="badge status">${it.status||'Planlagt'}</span>
-      </div>`;
-    }).join('');
-    box.innerHTML = title + list;
+    // List – Q4 has a more readable layout (date first, clear separation); others unchanged
+    if (q === 'Q4') {
+      const rows = (byQ[q] || []).slice().sort((a,b) => {
+        const da = a.date ? new Date(a.date).getTime() : NaN;
+        const db = b.date ? new Date(b.date).getTime() : NaN;
+        const aHas = Number.isFinite(da), bHas = Number.isFinite(db);
+        if (aHas && bHas) return da - db;
+        if (aHas) return -1; if (bHas) return 1;
+        const ma = MONTHS.indexOf(a.month), mb = MONTHS.indexOf(b.month);
+        if (ma !== mb) return ma - mb;
+        return (a.week||0) - (b.week||0);
+      }).map((it, idx) => {
+        const color = CAT_COLORS[it.cat] || 'var(--accent)';
+        const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : `${it.month||''} · Uge ${it.isoWeek||it.week||''}`;
+        const border = idx === 0 ? 'none' : '1px solid rgba(255,255,255,0.12)';
+        return `<div class="q4-row" style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:8px 6px;border-top:${border};">
+          <div class="q4-date" style="font-weight:700;font-size:12px;opacity:.95;">${dateStr}</div>
+          <div class="q4-body" style="display:flex;flex-direction:column;gap:4px;">
+            <div style="font-weight:600;">${it.title}</div>
+            <div class="meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;opacity:.9;font-size:11px;">
+              <span class="badge cat" style="border-color:${color};color:${color};">${it.cat}</span>
+              <span class="badge status">${it.status||'Planlagt'}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      box.innerHTML = title + rows;
+    } else {
+      const list = (byQ[q] || []).sort((a,b)=> (a.month===b.month? a.week-b.week: MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month))).map(it => {
+        const color = CAT_COLORS[it.cat] || 'var(--accent)';
+        const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+        return `<div class="meta" style="display:flex;justify-content:space-between;gap:8px;margin:4px 0;flex-wrap:wrap;">
+          <span style="font-weight:600;">${it.title}</span>
+          <span>Uge ${it.isoWeek||it.week}${dateStr?` · ${dateStr}`:''}</span>
+          <span class="badge cat" style="border-color:${color};color:${color};">${it.cat}</span>
+          <span class="badge status">${it.status||'Planlagt'}</span>
+        </div>`;
+      }).join('');
+      box.innerHTML = title + list;
+    }
     wrap.appendChild(box);
     // Draw thread for this quarter box (only for rendered ones)
     // Quarter centerline angle computed from geometry (mid of quarter sector)
