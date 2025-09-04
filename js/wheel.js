@@ -393,7 +393,8 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const wrap = svg.parentElement;
   if (!wrap) return;
   const id = `bubble_${(item.id||item.title||'').toString().replace(/[^a-z0-9]/ig,'_')}`;
-  if (document.getElementById(id)) return; // avoid duplicates
+  const existing = document.getElementById(id);
+  if (existing) { existing.parentNode.removeChild(existing); }
   const bubble = document.createElement('div');
   bubble.className = 'event-bubble show';
   bubble.id = id;
