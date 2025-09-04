@@ -227,6 +227,10 @@ textarea {
 }
 /* small inputs inside sheets/filters */
 .sheet input#shareSearch { width: 280px; }
+/* Force 24h time look where supported */
+input[type="time"] {
+  font-variant-numeric: tabular-nums;
+}
 .sheet #shareList .share-row { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; }
 .sheet #shareList .share-row:hover { background: rgba(255,255,255,0.04); }
 .sheet #shareList .title { font-weight:600; font-size:13px; }
