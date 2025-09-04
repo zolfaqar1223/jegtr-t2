@@ -343,7 +343,7 @@ function showEventBubble(svg, x, y, item, color) {
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
-  bubble.innerHTML = `<div class="heading">${item.title}</div><div class="meta"><span>Uge ${item.isoWeek||item.week}</span><span>${dateStr}${tRange}</span></div>${item.note?`<div class="note">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status" style="border-color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};">${item.status||'Planlagt'}</span></div>`;
+  bubble.innerHTML = `<div class="heading" style="font-size:12px;">${item.title}</div><div class="meta" style="font-size:11px;opacity:.9;"><span>Uge ${item.isoWeek||item.week}</span><span>${dateStr}${tRange}</span></div>${item.note?`<div class="note" style="font-size:11px;opacity:.9;">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status" style="border-color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};">${item.status||'Planlagt'}</span></div>`;
   const thread = document.createElement('div');
   thread.className = 'event-thread';
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
