@@ -1,5 +1,5 @@
 // Kundevisning: read-only rendering af hjul og liste
-import { MONTHS, readItems, readNotes, CAT_COLORS, STATUSES, CATS } from './store.js';
+import { MONTHS, readItems, readNotes, CAT_COLORS, STATUSES, CATS, readSettings } from './store.js';
 import { drawWheel } from './wheel.js';
 
 const wheelSvg = document.getElementById('wheel');
@@ -23,8 +23,16 @@ let currentIndex = -1;
 let items = [];
 let notes = {};
 let highlightMonths = [];
-// Zoom og pan er fjernet i kundevisning
+// Zoom og pan genindført i kundevisning
 const DEFAULT_ZOOM = 0.8; // vis let nedskaleret som på main
+let zoomLevel = DEFAULT_ZOOM;
+let panX = 0;
+let panY = 0;
+let isPanMode = false;
+let isPanning = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let isLocked = false;
 // no timeline renderer
 
 function renderListReadOnly(listEl, itemsToShow) {
@@ -176,8 +184,8 @@ function render(focusedMonth = null) {
     moveItemToMonthWeek: () => {}
   };
   try {
-    // Stable render; use quarter boxes for clean grouped display med statisk zoom for centrering
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, zoom: DEFAULT_ZOOM, panX: 0, panY: 0 });
+    // Stable render; quarter boxes + pan/zoom som på main
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
@@ -192,8 +200,10 @@ function render(focusedMonth = null) {
       wheelSvg.appendChild(txt);
     }
   }
-  // Ingen ekstra CSS-transform – zoom håndteres i drawWheel, så bobler/quarter boxes følger med
-  wheelSvg.style.transform = '';
+  // Anvend visuel transform (centreret) så hjulet følger pan/zoom
+  clampPanCustomer();
+  wheelSvg.style.transformOrigin = '50% 50%';
+  wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
   const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning
@@ -208,7 +218,12 @@ function render(focusedMonth = null) {
   }
 }
 
-// Zoom/pan helper fjernet i kundevisning
+// clamp + smooth helpers for customer
+function clampPanCustomer() {
+  const max = 100;
+  panX = Math.max(-max, Math.min(max, panX));
+  panY = Math.max(-max, Math.min(max, panY));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(location.search);
@@ -253,7 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnPrintCustomer').addEventListener('click', () => {
     window.print();
   });
-  // Zoom/pan indstillinger ignoreres i kundevisning
+  // Start med samme pan/zoom som main, hvis tilgængelig
+  try {
+    const s = readSettings();
+    if (typeof s.zoomLevel === 'number') zoomLevel = s.zoomLevel;
+    if (typeof s.panX === 'number') panX = s.panX;
+    if (typeof s.panY === 'number') panY = s.panY;
+  } catch {}
   // populate filters
   if (filterCat && filterStatus) {
     ['Alle', ...CATS].forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; filterCat.appendChild(o); });
@@ -272,7 +293,91 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // render next box (use all items for upcoming)
   renderNext(items);
-  // Zoom/pan kontroller fjernet i kundevisning
+  // Add zoom controls on customer view
+  const wrap = document.querySelector('.wheel-wrap');
+  if (wrap && !wrap.querySelector('.zoom-controls')) {
+    const zc = document.createElement('div');
+    zc.className = 'zoom-controls';
+    const btnMinus = document.createElement('button');
+    btnMinus.textContent = '−';
+    const btnPlus = document.createElement('button');
+    btnPlus.textContent = '+';
+    const btnPan = document.createElement('button');
+    btnPan.textContent = 'Pan';
+    btnPan.className = 'pan';
+    const btnLock = document.createElement('button');
+    btnLock.textContent = 'Lås';
+    btnLock.className = 'lock';
+    zc.appendChild(btnMinus);
+    zc.appendChild(btnPlus);
+    zc.appendChild(btnPan);
+    zc.appendChild(btnLock);
+    wrap.appendChild(zc);
+    function updateLockUI() {
+      btnMinus.disabled = isLocked;
+      btnPlus.disabled = isLocked;
+      btnPan.disabled = isLocked;
+      if (isLocked) {
+        btnLock.classList.add('active');
+        btnPan.classList.remove('active');
+        isPanMode = false;
+        wrap.style.cursor = '';
+      } else {
+        btnLock.classList.remove('active');
+      }
+    }
+    btnMinus.addEventListener('click', () => {
+      if (isLocked) return;
+      zoomLevel = Math.max(0.6, Math.round((zoomLevel - 0.1) * 10) / 10);
+      render();
+    });
+    btnPlus.addEventListener('click', () => {
+      if (isLocked) return;
+      zoomLevel = Math.min(1.6, Math.round((zoomLevel + 0.1) * 10) / 10);
+      render();
+    });
+    btnPan.addEventListener('click', () => {
+      if (isLocked) return;
+      isPanMode = !isPanMode;
+      wrap.style.cursor = isPanMode ? 'grab' : '';
+      if (isPanMode) btnPan.classList.add('active');
+      else btnPan.classList.remove('active');
+    });
+    btnLock.addEventListener('click', () => {
+      isLocked = !isLocked;
+      if (isLocked) {
+        isPanMode = false;
+        wrap.style.cursor = '';
+      }
+      updateLockUI();
+    });
+    wrap.addEventListener('mousedown', e => {
+      if (!isPanMode) return;
+      if (isLocked) return;
+      isPanning = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      wrap.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isPanning) return;
+      if (isLocked) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      panX += dx * 0.85;
+      panY += dy * 0.85;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      render();
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isPanning) return;
+      isPanning = false;
+      wrap.style.cursor = isPanMode ? 'grab' : '';
+      render();
+    });
+    updateLockUI();
+  }
   const vc = document.getElementById('viewerClose');
   const seeAllBtn = document.getElementById('seeAllCustomer');
   if (vc) vc.addEventListener('click', closeViewer);
