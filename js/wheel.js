@@ -474,6 +474,23 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     Q4: { left: wrapCR.left + 12, top: wrapCR.top + 12 }
   };
   const isCustomer = !!(document && document.body && document.body.classList && document.body.classList.contains('customer'));
+  // Prepare an SVG layer for curved quarter threads
+  let threadSvg = wrap.querySelector('svg.quarter-thread-layer');
+  if (!threadSvg) {
+    threadSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    threadSvg.classList.add('quarter-thread-layer');
+    threadSvg.setAttribute('width', String(wrapCR.width));
+    threadSvg.setAttribute('height', String(wrapCR.height));
+    threadSvg.style.position = 'absolute';
+    threadSvg.style.inset = '0';
+    threadSvg.style.pointerEvents = 'none';
+    wrap.appendChild(threadSvg);
+  } else {
+    // Resize and clear
+    threadSvg.setAttribute('width', String(wrapCR.width));
+    threadSvg.setAttribute('height', String(wrapCR.height));
+    while (threadSvg.firstChild) threadSvg.removeChild(threadSvg.firstChild);
+  }
   // Group items by quarter
   const byQ = { Q1:[], Q2:[], Q3:[], Q4:[] };
   items.forEach(it => { const q = it.quarter || inferQuarter(it.month); if (byQ[q]) byQ[q].push(it); });
@@ -506,29 +523,77 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     box.innerHTML = title + list;
     wrap.appendChild(box);
     // Draw thread for this quarter box (only for rendered ones)
+    // Quarter centerline angle
     const a1 = { Q1: Math.PI*7/4, Q2: Math.PI*1/4, Q3: Math.PI*3/4, Q4: Math.PI*5/4 }[q];
-    // Anchor slightly OUTSIDE the wheel and fade towards it (transparent near inner end)
-    const innerMargin = 10; // px from wheel edge
-    const rAnchor = (rWeekOuter || size*0.46) + innerMargin;
-    const [qx, qy] = polar(cx, cy, rAnchor, a1);
+    // Target point slightly INSIDE the week outer radius (so fade ends before wheel edge)
+    const fadeStopPad = 28; // px inside wheel outer edge
+    const rStop = Math.max(0, (rWeekOuter || size*0.46) - fadeStopPad);
+    const [tx, ty] = polar(cx, cy, rStop, a1);
     const rect = svg.getBoundingClientRect();
     const cX = rect.left + rect.width/2, cY = rect.top + rect.height/2;
-    const qx0 = cX + (qx - cX)*zoom + panX;
-    const qy0 = cY + (qy - cY)*zoom + panY;
+    const endX = cX + (tx - cX)*zoom + panX;
+    const endY = cY + (ty - cY)*zoom + panY;
+    // Start point from the box edge facing the wheel
     const bcr = box.getBoundingClientRect();
-    const x2 = Math.max(bcr.left, Math.min(bcr.right, qx0));
-    const y2 = Math.max(bcr.top, Math.min(bcr.bottom, qy0));
-    const line = document.createElement('div');
-    line.className = 'event-thread';
-    line.style.left = (qx0 - wrapCR.left) + 'px';
-    line.style.top  = (qy0 - wrapCR.top) + 'px';
-    // Shorten a touch near the inner end so it visually stops before the wheel
-    const fullLen = Math.hypot(x2 - qx0, y2 - qy0);
-    const trim = 6; // px
-    line.style.width = Math.max(0, fullLen - trim) + 'px';
-    line.style.transformOrigin = '0 0';
-    line.style.transform = `rotate(${Math.atan2(y2-qy0, x2-qx0)*180/Math.PI}deg)`;
-    wrap.appendChild(line);
+    const boxLeft = bcr.left - wrapCR.left;
+    const boxTop = bcr.top - wrapCR.top;
+    const boxRight = bcr.right - wrapCR.left;
+    const boxBottom = bcr.bottom - wrapCR.top;
+    const boxMidY = (boxTop + boxBottom) / 2;
+    let startX, startY;
+    if (q === 'Q1' || q === 'Q2') {
+      // Left edge, mid
+      startX = boxLeft;
+      startY = boxMidY;
+    } else if (q === 'Q3') {
+      // Right edge, slightly above mid
+      startX = boxRight;
+      startY = boxMidY - 6;
+    } else { // Q4
+      // Right edge, mid
+      startX = boxRight;
+      startY = boxMidY;
+    }
+    // Build a gentle one-control-point curve (quadratic Bezier)
+    const vx = endX - startX;
+    const vy = endY - startY;
+    // Perpendicular normal for bowing
+    const len = Math.hypot(vx, vy) || 1;
+    const nx = -vy / len;
+    const ny = vx / len;
+    const bow = 18; // px
+    // Bias bow direction away from the box (choose based on quarter)
+    const dir = (q === 'Q1' || q === 'Q4') ? 1 : -1;
+    const cx1 = startX + vx * 0.5 + nx * bow * dir;
+    const cy1 = startY + vy * 0.5 + ny * bow * dir;
+    // Gradient for stroke from start(opaque) to end(transparent)
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    const gid = `qgrad_${q}`;
+    grad.setAttribute('id', gid);
+    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+    grad.setAttribute('x1', String(startX));
+    grad.setAttribute('y1', String(startY));
+    grad.setAttribute('x2', String(endX));
+    grad.setAttribute('y2', String(endY));
+    const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    s1.setAttribute('offset', '0%');
+    s1.setAttribute('stop-color', 'rgba(255,255,255,0.85)');
+    const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    s2.setAttribute('offset', '100%');
+    s2.setAttribute('stop-color', 'rgba(255,255,255,0)');
+    grad.appendChild(s1); grad.appendChild(s2);
+    defs.appendChild(grad);
+    threadSvg.appendChild(defs);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${startX} ${startY} Q ${cx1} ${cy1} ${endX} ${endY}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', `url(#${gid})`);
+    path.setAttribute('stroke-width', '2.2');
+    path.setAttribute('stroke-linecap', 'round');
+    // Subtle glow
+    path.style.filter = 'drop-shadow(0 0 4px rgba(255,255,255,0.25))';
+    threadSvg.appendChild(path);
   });
 }
 
