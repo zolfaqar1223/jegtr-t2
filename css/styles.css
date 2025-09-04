@@ -9,15 +9,16 @@
 
 /* Share list layout: checkbox left, content right */
 .sheet #shareList { max-height: 320px; overflow:auto; padding:8px; }
-.sheet #shareList .month-divider { height:1px; background: rgba(255,255,255,0.12); margin: 6px 0 8px; border-radius:1px; }
-.sheet #shareList .share-row { display:grid; grid-template-columns: 20px 1fr; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:12px; }
-.sheet #shareList .share-row:hover { background: rgba(255,255,255,0.04); }
-.sheet #shareList .title { font-weight:600; font-size:13px; }
-.sheet #shareList .meta { font-size:12px; opacity:.9; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.sheet #shareList .month-divider { height:1px; background: rgba(255,255,255,0.12); margin: 6px 0 10px; border-radius:1px; }
+.sheet #shareList .share-row { display:grid; grid-template-columns: 22px 1fr; align-items:flex-start; gap:12px; padding:12px 14px; border-radius:14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); }
+.sheet #shareList .share-row:hover { background: rgba(255,255,255,0.10); box-shadow: 0 6px 18px rgba(0,0,0,0.20); }
+.sheet #shareList .share-row input[type="checkbox"] { width:16px; height:16px; accent-color: var(--accent); margin-top: 3px; }
+.sheet #shareList .title { font-weight:700; font-size:14px; }
+.sheet #shareList .meta { font-size:12px; opacity:.95; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .sheet #shareList .meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.sheet #shareList .meta-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
-.sheet #shareList .badge { height:22px; font-size:11px; padding:0 8px; color:#eef7f6; }
-.sheet #shareList .group-title { margin-top:12px; font-weight:700; font-size:14px; color: rgba(255,255,255,0.96); }
+.sheet #shareList .meta-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.sheet #shareList .badge { height:22px; font-size:11px; padding:0 10px; color:#eef7f6; border-width:1.2px; }
+.sheet #shareList .group-title { margin-top:16px; font-weight:700; font-size:16px; letter-spacing:.2px; color: rgba(255,255,255,0.98); }
 /* Globale stilregler og layout til Årshjul.  */
 :root {
   --bg: #0F2F2E; /* Dark Teal */
@@ -584,17 +585,19 @@ svg {
 }
 
 .sheet {
-  background: var(--panel);
-  border: 1px solid transparent;
-  border-radius: 16px;
-  width: min(90vw, 860px);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 18px;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  width: min(90vw, 880px);
   max-height: 90vh;
   overflow: auto;
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.06);
+  gap: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.40), 0 0 0 1px rgba(255,255,255,0.08);
 }
 
 .sheet h2 {
