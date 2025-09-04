@@ -770,11 +770,12 @@ body.customer #listSection { grid-area: acts; }
   .customer .card { display: none !important; }
   .customer .wheel-wrap, .customer #listSection { display: block !important; }
   /* Force content visible when printing customer view (1:1 look) */
-  .customer .wheel-wrap { overflow: visible !important; height: 100vh; padding: 0 16px; page-break-after: always; }
+  .customer .wheel-wrap { overflow: visible !important; height: 190mm; padding: 0 8mm; page-break-after: always; }
   .event-bubble { position: static; transform: none !important; opacity: 1 !important; filter: none !important; box-shadow: 0 0 0 1px rgba(0,0,0,0.06); }
   .quarter-box { position: static; }
   .customer #nextSection { display: none !important; }
-  .customer #listSection { page-break-before: always; height: 100vh; overflow: visible !important; padding: 0 16px; }
+  .customer #listSection { page-break-before: always; height: 190mm; overflow: hidden !important; padding: 0 8mm; }
+  .customer #listSection .list { max-height: calc(190mm - 24mm); overflow: hidden; }
   /* Preserve colors */
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
