@@ -36,6 +36,19 @@
   pointer-events: none;
 }
 
+/* Customer: make activity cards crisp (no overlays or blur) */
+.customer .item.glass,
+.customer #listSection .item {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.customer .item.glass::before,
+.customer .item.glass::after,
+.customer #listSection .item::before,
+.customer #listSection .item::after { display: none !important; content: none !important; }
+
 header.glass {
   background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
   border-bottom: 1px solid var(--glass-border);
