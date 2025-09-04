@@ -309,14 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cat !== 'Alle') arr = arr.filter(i => i.cat === cat);
       if (st !== 'Alle') arr = arr.filter(i => (i.status||'Planlagt') === st);
       if (yr !== 'Alle') arr = arr.filter(i => (i.date? new Date(i.date).getFullYear(): 0) === Number(yr));
-      // Compute highlight months from the filtered set
-      const hm = Array.from(new Set(arr.map(i => i.month)));
-      // Re-draw wheel to reflect filters (restrict to highlighted months)
+      // Re-draw wheel with filtered data ONLY; no highlight or focus animations
       try {
         const callbacks = {
           openMonth: (monthName) => {
             const monthItems = arr.filter(x => x.month === monthName);
-            drawWheel(wheelSvg, arr, callbacks, { focusedMonth: monthName, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel, highlightMonths: hm, restrictMonths: hm.length > 0 });
+            drawWheel(wheelSvg, arr, callbacks, { focusedMonth: monthName, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel });
             clampPanCustomer();
             wheelSvg.style.transformOrigin = '50% 50%';
             wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
@@ -326,12 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
           moveItemToMonth: () => {},
           moveItemToMonthWeek: () => {}
         };
-        drawWheel(wheelSvg, arr, callbacks, { showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel, highlightMonths: hm, restrictMonths: hm.length > 0 });
+        drawWheel(wheelSvg, arr, callbacks, { showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel });
         clampPanCustomer();
         wheelSvg.style.transformOrigin = '50% 50%';
         wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
         const wrapEl = wheelSvg && wheelSvg.parentElement;
-        if (wrapEl) { if (hm.length > 0) wrapEl.classList.add('focused'); else wrapEl.classList.remove('focused'); }
+        if (wrapEl) { wrapEl.classList.remove('focused'); }
       } catch {}
       // Update list/next using filtered items
       renderListReadOnly(listContainer, arr);
