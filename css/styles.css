@@ -85,6 +85,17 @@ header .right {
   flex-wrap: wrap;
 }
 
+/* Ensure all header actions (right corner) have the exact same size */
+header .right a,
+header .right button {
+  min-width: 120px;
+  height: 36px;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Make Dashboard link look like a primary button */
 header .right a#btnDashboard {
   display: inline-block;
