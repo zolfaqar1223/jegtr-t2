@@ -44,6 +44,7 @@ let lastMouseY = 0;
 
 // DOM‑cache
 const dateInput = document.getElementById('date');
+const timeInput = document.getElementById('time');
 const titleInput = document.getElementById('title');
 const ownerInput = document.getElementById('owner');
 const categorySelect = document.getElementById('category');
@@ -153,6 +154,16 @@ function resetForm() {
 async function saveItem() {
   // Udled måned/uge ud fra valgt dato eller brug dags dato
   const baseDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : new Date();
+  // apply time if provided (HH:MM)
+  if (timeInput && timeInput.value) {
+    const [hh, mm] = timeInput.value.split(':').map(n=>parseInt(n,10));
+    if (Number.isFinite(hh) && Number.isFinite(mm)) {
+      baseDate.setHours(hh);
+      baseDate.setMinutes(mm);
+      baseDate.setSeconds(0);
+      baseDate.setMilliseconds(0);
+    }
+  }
   const month = MONTHS[baseDate.getMonth()];
   const day = baseDate.getDate();
   const week = Math.max(1, Math.min(5, Math.ceil(day / 7)));

@@ -23,9 +23,16 @@
     <!-- Tilføj aktivitet -->
     <section class="card glass" id="formSection">
       <h3>Tilføj aktivitet</h3>
-      <label for="date">Dato
-        <input id="date" type="date" />
-      </label>
+      <div style="display:flex; gap:8px; align-items:end; flex-wrap:wrap;">
+        <label for="date" style="flex:0 0 auto;">
+          Dato
+          <input id="date" type="date" />
+        </label>
+        <label for="time" style="flex:0 0 auto;">
+          Tidspunkt
+          <input id="time" type="time" />
+        </label>
+      </div>
       <label for="title">Aktivitet
         <input id="title" placeholder="Titel på aktiviteten" />
       </label>

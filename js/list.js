@@ -93,10 +93,11 @@ export function renderList(listEl, items, callbacks) {
     meta.appendChild(badge);
     meta.appendChild(statusBadge);
     const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+    const timeStr = it.date ? new Date(it.date).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' }) : '';
     const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
     const qy = it.quarter && it.year ? ` · ${it.quarter} · ${it.year}` : '';
     const owner = it.owner ? ` · Ansvarlig: ${it.owner}` : '';
-    meta.append(` ${it.month}${weekStr} · ${dateStr}${qy}${owner}`);
+    meta.append(` ${it.month}${weekStr} · ${dateStr}${timeStr?` · ${timeStr}`:''}${qy}${owner}`);
 
     // Inline details (hidden by default)
     const details = document.createElement('div');
