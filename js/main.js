@@ -658,6 +658,22 @@ function render() {
       if (statusSelect) statusSelect.value = item.status || 'Planlagt';
       notesInput.value = item.note || '';
       if (dateInput) dateInput.value = '';
+      // Prefill date and time range if present
+      try {
+        if (item.date && dateInput) {
+          const d = new Date(item.date);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth()+1).padStart(2,'0');
+          const dd = String(d.getDate()).padStart(2,'0');
+          dateInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+      } catch {}
+      const tf = (item.timeFrom||'').trim();
+      const tt = (item.timeTo||'').trim();
+      const tfEl = document.getElementById('timeFrom');
+      const ttEl = document.getElementById('timeTo');
+      if (tfEl) tfEl.value = tf || '';
+      if (ttEl) ttEl.value = tt || '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     onOpen: monthName => {
