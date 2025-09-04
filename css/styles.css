@@ -94,6 +94,18 @@ header .right button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+/* Unify hover animation for both links and buttons */
+header .right a:hover,
+header .right button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent) inset,
+    0 0 12px var(--neon),
+    0 0 28px rgba(212, 175, 55, 0.28);
+  transform: translateY(-1px);
 }
 
 /* Make Dashboard link look like a primary button */

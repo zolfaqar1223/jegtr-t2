@@ -92,17 +92,19 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   center.setAttribute('stroke', 'var(--muted)');
   svg.appendChild(center);
   // Midtertekst
-  const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  t1.setAttribute('x', cx);
-  t1.setAttribute('y', cy);
-  t1.setAttribute('text-anchor', 'middle');
-  t1.setAttribute('dominant-baseline', 'middle');
-  t1.setAttribute('alignment-baseline', 'middle');
-  t1.setAttribute('font-size', isCustomerView ? '18' : '16');
-  t1.setAttribute('font-weight', '600');
-  t1.setAttribute('fill', '#ffffff');
-  t1.textContent = 'Årshjul';
-  svg.appendChild(t1);
+  if (!isCustomerView) {
+    const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t1.setAttribute('x', cx);
+    t1.setAttribute('y', cy);
+    t1.setAttribute('text-anchor', 'middle');
+    t1.setAttribute('dominant-baseline', 'middle');
+    t1.setAttribute('alignment-baseline', 'middle');
+    t1.setAttribute('font-size', '16');
+    t1.setAttribute('font-weight', '600');
+    t1.setAttribute('fill', '#ffffff');
+    t1.textContent = 'Årshjul';
+    svg.appendChild(t1);
+  }
   const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   t2.setAttribute('x', cx);
   t2.setAttribute('y', cy + 14);
