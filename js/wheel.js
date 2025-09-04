@@ -343,7 +343,16 @@ function showEventBubble(svg, x, y, item, color) {
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
-  bubble.innerHTML = `<div class="heading" style="font-size:12px;">${item.title}</div><div class="meta" style="font-size:11px;opacity:.9;"><span>Uge ${item.isoWeek||item.week}</span><span>${dateStr}${tRange}</span></div>${item.note?`<div class="note" style="font-size:11px;opacity:.9;">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status" style="border-color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};">${item.status||'Planlagt'}</span></div>`;
+  bubble.innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+        <div class="heading" style="font-size:12px;">${item.title}</div>
+        <div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status" style="border-color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};color:${(STATUS_COLORS[item.status||'Planlagt']||'#999')};">${item.status||'Planlagt'}</span></div>
+      </div>
+      <div class="meta" style="font-size:11px;opacity:.9;text-align:right;white-space:nowrap;"><span>${dateStr}${tRange}</span><span style="margin-left:8px;">Uge ${item.isoWeek||item.week}</span></div>
+    </div>
+    ${item.note?`<div class="note" style="font-size:11px;opacity:.9;margin-top:6px;">${item.note}</div>`:''}
+  `;
   const thread = document.createElement('div');
   thread.className = 'event-thread';
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
@@ -391,7 +400,16 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
-  bubble.innerHTML = `<div class="heading" style="font-size:12px;">${item.title}</div><div class="meta" style="font-size:11px;opacity:.9;"><span>Uge ${item.isoWeek||item.week}</span>${dateStr?`<span>${dateStr}${tRange}</span>`:''}</div>${item.note?`<div class=\"note\" style=\"font-size:11px;opacity:.9;\">${item.note}</div>`:''}<div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status">${item.status||'Planlagt'}</span></div>`;
+  bubble.innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+        <div class="heading" style="font-size:12px;">${item.title}</div>
+        <div class="badges"><span class="badge cat" style="border-color:${color};color:${color};">${item.cat}</span><span class="badge status">${item.status||'Planlagt'}</span></div>
+      </div>
+      <div class="meta" style="font-size:11px;opacity:.9;text-align:right;white-space:nowrap;">${dateStr?`<span>${dateStr}${tRange}</span>`:''}<span style="margin-left:8px;">Uge ${item.isoWeek||item.week}</span></div>
+    </div>
+    ${item.note?`<div class=\"note\" style=\"font-size:11px;opacity:.9;margin-top:6px;\">${item.note}</div>`:''}
+  `;
   const thread = document.createElement('div');
   thread.className = 'event-thread';
   thread.style.background = `linear-gradient(90deg, rgba(255,255,255,0.0), ${color})`;
