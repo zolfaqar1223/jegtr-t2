@@ -191,7 +191,7 @@ function render(focusedMonth = null) {
   };
   try {
     // Stable render; quarter boxes + pan/zoom som på main
-    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel });
+    drawWheel(wheelSvg, items, callbacks, { focusedMonth, showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel, highlightMonths });
   } catch (err) {
     try { console.error('Fejl ved tegning af hjul', err); } catch {}
     if (wheelSvg) {
@@ -210,6 +210,14 @@ function render(focusedMonth = null) {
   clampPanCustomer();
   wheelSvg.style.transformOrigin = '50% 50%';
   wheelSvg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+  // Toggle focused look when we have highlighted months (from Share selection)
+  try {
+    const wrapEl = wheelSvg && wheelSvg.parentElement;
+    if (wrapEl) {
+      if (Array.isArray(highlightMonths) && highlightMonths.length > 0) wrapEl.classList.add('focused');
+      else wrapEl.classList.remove('focused');
+    }
+  } catch {}
   const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning

@@ -153,11 +153,14 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     path.setAttribute('fill', `var(--q${qIndex + 1})`);
     const isHl = useHighlight && hlSet.has(monthName);
     path.setAttribute('opacity', isHl ? '0.45' : (useHighlight ? '0.14' : '0.30'));
+    // Tag quarter group for focus styling
+    path.classList.add('quarter-bg');
+    path.dataset.quarter = `Q${qIndex+1}`;
     if (isHl) {
       path.setAttribute('stroke', 'rgba(255,255,255,0.65)');
       path.setAttribute('stroke-width', '1');
     }
-    path.style.transition = 'opacity 260ms ease, stroke 260ms ease';
+    path.style.transition = 'opacity 320ms cubic-bezier(.4,.0,.2,1), stroke 320ms cubic-bezier(.4,.0,.2,1), filter 320ms cubic-bezier(.4,.0,.2,1), transform 320ms cubic-bezier(.4,.0,.2,1)';
     path.style.cursor = 'pointer';
     path.classList.add('month-seg');
     path.addEventListener('click', () => callbacks.openMonth(monthName));
@@ -192,6 +195,9 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       const baseOp = Math.min(op, 0.6);
       const opFinal = isHl ? Math.min(0.85, baseOp + 0.2) : (useHighlight ? Math.max(0.06, baseOp - 0.12) : baseOp);
       p.setAttribute('opacity', String(opFinal));
+      p.classList.add('quarter-hl');
+      p.dataset.quarter = `Q${qIndex+1}`;
+      p.style.transition = 'opacity 320ms cubic-bezier(.4,.0,.2,1), filter 320ms cubic-bezier(.4,.0,.2,1), transform 320ms cubic-bezier(.4,.0,.2,1)';
       p.style.cursor = 'pointer';
       p.classList.add('month-seg');
       if (isHl && showBubbles) p.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.35))';
@@ -207,11 +213,27 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     txt.setAttribute('text-anchor', 'middle');
     txt.setAttribute('font-size', isCustomerView ? '14' : '12');
     txt.setAttribute('fill', isHl ? '#ffffff' : (useHighlight ? 'rgba(255,255,255,0.42)' : '#ffffff'));
+    txt.classList.add('quarter-label');
+    txt.dataset.quarter = `Q${qIndex+1}`;
+    txt.style.transition = 'opacity 320ms cubic-bezier(.4,.0,.2,1), transform 320ms cubic-bezier(.4,.0,.2,1), filter 320ms cubic-bezier(.4,.0,.2,1)';
     txt.textContent = monthName;
     txt.style.cursor = 'pointer';
     if (isHl) txt.setAttribute('font-weight', '700');
     txt.addEventListener('click', () => callbacks.openMonth(monthName));
     svg.appendChild(txt);
+  }
+  // After drawing all months, mark focus quarters when highlightMonths exist
+  if (Array.isArray(highlightMonths) && highlightMonths.length > 0) {
+    const qMap = { Q1: new Set(['Januar','Februar','Marts']), Q2: new Set(['April','Maj','Juni']), Q3: new Set(['Juli','August','September']), Q4: new Set(['Oktober','November','December']) };
+    const activeQuarters = new Set();
+    highlightMonths.forEach(mn => {
+      Object.entries(qMap).forEach(([q, set]) => { if (set.has(mn)) activeQuarters.add(q); });
+    });
+    const markFocus = (el) => {
+      const q = el && el.dataset && el.dataset.quarter; if (!q) return;
+      if (activeQuarters.has(q)) el.classList.add('is-focus'); else el.classList.remove('is-focus');
+    };
+    [...svg.querySelectorAll('.quarter-bg'), ...svg.querySelectorAll('.quarter-hl'), ...svg.querySelectorAll('.quarter-label')].forEach(markFocus);
   }
   // Beregn ugetællinger (52 segmenter) og farver baseret på kategori
   const weekCounts = new Array(52).fill(0);

@@ -315,6 +315,19 @@ textarea {
   overflow: hidden;
   position: relative;
 }
+.wheel-wrap.focused .quarter-bg:not(.is-focus),
+.wheel-wrap.focused .quarter-hl:not(.is-focus),
+.wheel-wrap.focused .quarter-label:not(.is-focus) {
+  opacity: 0.18 !important;
+  filter: blur(1.2px);
+  transform: scale(0.95);
+  transform-origin: 50% 50%;
+}
+.wheel-wrap.focused .is-focus {
+  opacity: 0.85 !important;
+  filter: none;
+  transform: scale(1.05);
+}
 #formSection { grid-area: form; }
 #listSection { grid-area: acts; }
 
