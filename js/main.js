@@ -764,16 +764,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const close = document.getElementById('btnCloseHelp');
     // build help index
     const helpIndex = [
-      { key: 'form', title: 'Formular: Tilføj aktivitet', body: 'Udfyld dato, titel, kategori, status, evt. ansvarlig og noter. Klik Gem.' },
-      { key: 'wheel', title: 'Årshjul', body: 'Klik på måneder/uger for at åbne detaljer. Træk aktiviteter mellem måneder/uger.' },
-      { key: 'list', title: 'Aktivitetsliste', body: 'Klik for at folde detaljer ud, redigér, slet eller træk for at omplacere.' },
-      { key: 'share', title: 'Del med kunde', body: 'Åbn kundevisning eller kopier link. PDF-understøttelse.' },
-      { key: 'customer', title: 'Kundevisning', body: 'Læsbar visning af årshjul og liste. Print/PDF-knap.' },
-      { key: 'dashboard', title: 'Dashboard', body: 'KPI’er, status/kategorier, risici, ressourcer og ændringslog.' },
-      { key: 'kpi', title: 'KPI’er', body: 'Klik på en KPI for at filtrere aktivitetslisten.' },
-      { key: 'risks', title: 'Risikoområder', body: 'Overblik over høj belastning og manglende ansvarlige. Klik for at tildele ansvarlig.' },
-      { key: 'resources', title: 'Ressourcer', body: 'Antal aktiviteter per ansvarlig.' },
-      { key: 'changelog', title: 'Ændringslog', body: 'Historik over redigeringer. Klik for at se før/efter.' }
+      {
+        key: 'form',
+        title: 'Formular: Tilføj aktivitet',
+        body: 'Opret aktiviteter med: Dato (årets ISO‑uge beregnes automatisk), Titel, Ansvarlig (person/rolle), Kategori (Releasemøde, Netværksmøde, Roadmapmøde, KTU, Onboarding, Rapportmøde eller Andet), Status (Planlagt, Afholdt, Aflyst m.fl.), Vedhæftede filer (vises i kundevisning), Noter samt tidsrum (Fra–Til i 24‑timers format). Når du gemmer, opdateres Årshjul, aktivitetsliste, KPI’er og dashboard. Aktiviteter kan altid redigeres eller slettes – redigeringsformularen forudfyldes med alle oplysninger.'
+      },
+      {
+        key: 'wheel',
+        title: 'Årshjul',
+        body: 'Giver en visuel oversigt over måneder og kvartaler. Aktiviteter placeres efter valgt dato/ISO‑uge. Du kan zoome og panorere. Klik på aktivitet/måned for detaljer. Brug filtre til at fokusere på kategori eller status.'
+      },
+      {
+        key: 'list',
+        title: 'Aktivitetsliste',
+        body: 'Liste over alle aktiviteter med søgning/filtre. Hver række viser dato, tidsrum (HH:MM–HH:MM), kategori/status‑chips og ansvarlig. Brug Rediger/Slet til ændringer.'
+      },
+      {
+        key: 'share',
+        title: 'Del med kunde',
+        body: 'Generér kundevisning som link eller PDF. Vedhæftede filer (fx agenda/præsentation) vises for kunden. Du kan vælge kvartaler/aktiviteter før deling.'
+      },
+      {
+        key: 'customer',
+        title: 'Kundevisning',
+        body: 'En læsbar men skrivebeskyttet visning af årshjul og liste. Viser status, dato og tidsrum samt vedhæftede filer. Interne noter og ændringslog deles ikke.'
+      },
+      {
+        key: 'dashboard',
+        title: 'Dashboard',
+        body: 'Samlet overblik: KPI’er, Aktiviteter, Status & Kategori (diagram), Indsigter, Afsluttede pr. måned, Risikoområder, Ressourcer og Ændringslog.'
+      },
+      {
+        key: 'kpi',
+        title: 'KPI’er',
+        body: 'Nøgletal: Denne måned, Kommende, Uden ansvarlig, Afsluttet i år. Klik på en KPI for at filtrere aktivitetslisten.'
+      },
+      {
+        key: 'risks',
+        title: 'Risikoområder',
+        body: 'Finder potentielle problemer (fx mangler ansvarlig). Du kan åbne og tildele ansvarlige direkte.'
+      },
+      {
+        key: 'resources',
+        title: 'Ressourcer',
+        body: 'Viser antal aktiviteter per ansvarlig og et simpelt belastningsniveau. Hjælper med fornuftig opgavefordeling.'
+      },
+      {
+        key: 'changelog',
+        title: 'Ændringslog',
+        body: 'Kronologisk historik over ændringer (flytninger, status, ansvarlig m.m.) med tidspunkt og før/efter.'
+      },
+      {
+        key: 'help',
+        title: 'Hjælp & Onboarding',
+        body: 'Indbygget guide med søgning – find hurtigt svar (fx “Hvordan tilføjer jeg en aktivitet?”). Velegnet til både nye brugere og kunder.'
+      }
     ];
     const list = document.getElementById('helpList');
     const detail = document.getElementById('helpDetail');
