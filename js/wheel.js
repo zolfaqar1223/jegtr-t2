@@ -489,6 +489,7 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
   Object.keys(byQ).forEach(q => {
     const box = document.createElement('div');
     box.className = `event-bubble show quarter-box qbox-${q}`;
+    box.style.fontSize = '12px';
     box.style.minWidth = boxW + 'px';
     box.style.maxWidth = boxW + 'px';
     if (isCustomer) {

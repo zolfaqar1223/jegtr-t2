@@ -714,6 +714,14 @@ body.customer #listSection { grid-area: acts; }
 .event-bubble .heading { font-size: 12px; }
 .event-bubble .meta { font-size: 11px; }
 .event-bubble .note { font-size: 11px; }
+
+/* Ensure quarter boxes (Q1–Q4) use uniform sizing like Q2 */
+.quarter-box { font-size: 12px; }
+.quarter-box .heading { font-size: 12px; }
+.quarter-box .meta { font-size: 12px; }
+.quarter-box .q4-row { padding: 8px 6px; }
+.quarter-box .q4-date { font-size: 12px; }
+.quarter-box .q4-body { font-size: 12px; }
 .event-bubble.show {
   opacity: 1;
   transform: translateY(0) scale(1);
