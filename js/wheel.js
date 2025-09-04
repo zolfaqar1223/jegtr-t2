@@ -490,6 +490,8 @@ function emphasizeBubble(svg, item, on) {
 // ====== Quarter boxes ======
 function renderQuarterBoxes(svg, layer, items, geom, transform) {
   const wrap = layer.parentElement; if (!wrap) return;
+  // Remove previously rendered quarter boxes to prevent duplicates on re-render
+  try { [...wrap.querySelectorAll('.quarter-box')].forEach(n => n.parentNode && n.parentNode.removeChild(n)); } catch {}
   const wrapCR = wrap.getBoundingClientRect();
   const { cx, cy, size, rWeekOuter } = geom; const { panX, panY, zoom } = transform;
   // Positions for Q1..Q4 boxes (relative to wrap), corners outside wheel

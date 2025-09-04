@@ -776,11 +776,13 @@ body.customer #listSection { grid-area: acts; }
     background: transparent;
     box-shadow: none;
   }
-  /* Force content visible when printing customer view */
-  .customer .wheel-wrap { overflow: visible !important; min-height: auto; }
-  .customer .wheel-wrap #wheel { max-width: 1000px !important; height: auto !important; }
-  .event-bubble { position: static; transform: none; opacity: 1; filter: none; box-shadow: none; }
+  /* Force content visible when printing customer view (1:1 look) */
+  .customer .wheel-wrap { overflow: visible !important; min-height: auto; padding: 24px; }
+  .customer .wheel-wrap #wheel { max-width: 1100px !important; height: auto !important; }
+  .event-bubble { position: static; transform: none !important; opacity: 1 !important; filter: none !important; box-shadow: 0 0 0 1px rgba(0,0,0,0.06); }
   .quarter-box { position: static; }
+  /* Preserve colors */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* Timeline styles removed */
