@@ -760,6 +760,8 @@ body.customer h1 { font-size: 26px; }
 .quarter-box .q4-row { padding: 8px 6px; }
 .quarter-box .q4-date { font-size: 12px; }
 .quarter-box .q4-body { font-size: 12px; }
+/* Ensure quarter info boxes have identical visibility regardless of page background */
+.quarter-box { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(255,255,255,0.08) !important; }
 .event-bubble.show {
   opacity: 1;
   transform: translateY(0) scale(1);
