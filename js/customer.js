@@ -8,6 +8,7 @@ const listContainer = document.getElementById('list');
 const nextBox = document.getElementById('nextBox');
 const filterCat = document.getElementById('custFilterCat');
 const filterStatus = document.getElementById('custFilterStatus');
+const filterYear = document.getElementById('custFilterYear');
 // Fjernet månedsnoter fra kundevisning
 const seeAllBtn = document.getElementById('seeAllCustomer');
 const viewerModal = document.getElementById('viewerModal');
@@ -293,20 +294,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof s.panY === 'number') panY = s.panY;
   } catch {}
   // populate filters
-  if (filterCat && filterStatus) {
+  if (filterCat && filterStatus && filterYear) {
     ['Alle', ...CATS].forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; filterCat.appendChild(o); });
     ['Alle', ...STATUSES].forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; filterStatus.appendChild(o); });
+    // Years: auto-detect from items; default 'Alle'
+    const years = Array.from(new Set(items.map(i => (i.date? new Date(i.date).getFullYear(): null)).filter(Boolean))).sort();
+    const yearOpts = ['Alle', ...years];
+    yearOpts.forEach(y => { const o = document.createElement('option'); o.value = String(y); o.textContent = String(y); filterYear.appendChild(o); });
     const applyFilters = () => {
       const cat = filterCat.value || 'Alle';
       const st = filterStatus.value || 'Alle';
+      const yr = filterYear.value || 'Alle';
       let arr = [...items];
       if (cat !== 'Alle') arr = arr.filter(i => i.cat === cat);
       if (st !== 'Alle') arr = arr.filter(i => (i.status||'Planlagt') === st);
+      if (yr !== 'Alle') arr = arr.filter(i => (i.date? new Date(i.date).getFullYear(): 0) === Number(yr));
       renderListReadOnly(listContainer, arr);
       renderNext(arr);
+      // Also limit wheel highlight to selected year if any
+      try {
+        let hm = [];
+        if (yr !== 'Alle') {
+          const months = new Set(arr.map(i => i.month));
+          hm = Array.from(months);
+        } else if (Array.isArray(highlightMonths) && highlightMonths.length) {
+          hm = highlightMonths;
+        }
+        drawWheel(wheelSvg, items, { openMonth: callbacks.openMonth }, { showBubbles: false, showQuarterBoxes: true, panX, panY, zoom: zoomLevel, highlightMonths: hm });
+      } catch {}
     };
     filterCat.addEventListener('change', applyFilters);
     filterStatus.addEventListener('change', applyFilters);
+    filterYear.addEventListener('change', applyFilters);
   }
   // render next box (use all items for upcoming)
   renderNext(items);

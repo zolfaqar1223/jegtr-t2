@@ -29,33 +29,29 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   try { console.debug('[YearWheel] draw', Array.isArray(items) ? items.length : 'ukendt'); } catch {}
   // Ryd tidligere indhold
   svg.innerHTML = '';
-  // Always provide a soft blur filter for month glows
-  {
+  if (showBubbles) {
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    if (showBubbles) {
-      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
-      grad.setAttribute('id', 'hlGrad');
-      grad.setAttribute('cx', '50%');
-      grad.setAttribute('cy', '50%');
-      grad.setAttribute('r', '60%');
-      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      stop1.setAttribute('offset', '0%');
-      stop1.setAttribute('stop-color', '#ffffff');
-      stop1.setAttribute('stop-opacity', '0.30');
-      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      stop2.setAttribute('offset', '100%');
-      stop2.setAttribute('stop-color', '#ffffff');
-      stop2.setAttribute('stop-opacity', '0');
-      grad.appendChild(stop1); grad.appendChild(stop2);
-      defs.appendChild(grad);
-    }
-    const monthGlow = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    monthGlow.setAttribute('id', 'monthGlow');
-    const blur2 = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-    blur2.setAttribute('stdDeviation', '1.8');
-    blur2.setAttribute('result', 'blurOut');
-    monthGlow.appendChild(blur2);
-    defs.appendChild(monthGlow);
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+    grad.setAttribute('id', 'hlGrad');
+    grad.setAttribute('cx', '50%');
+    grad.setAttribute('cy', '50%');
+    grad.setAttribute('r', '60%');
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#ffffff');
+    stop1.setAttribute('stop-opacity', '0.30');
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#ffffff');
+    stop2.setAttribute('stop-opacity', '0');
+    grad.appendChild(stop1); grad.appendChild(stop2);
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'softGlow');
+    const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+    blur.setAttribute('stdDeviation', '3');
+    blur.setAttribute('result', 'coloredBlur');
+    filter.appendChild(blur);
+    defs.appendChild(grad); defs.appendChild(filter);
     svg.appendChild(defs);
   }
   // Use container width to avoid CSS transform affecting measurement
@@ -144,19 +140,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   // Månedsringe og highligths
   const useHighlight = Array.isArray(highlightMonths) && highlightMonths.length > 0;
   const hlSet = new Set(useHighlight ? highlightMonths : []);
-  // Year presence per month (customer view only)
-  const monthYearPresence = new Array(12).fill(null).map(() => ({ has2025: false, has2026: false }));
-  try {
-    items.forEach(it => {
-      if (!it || !it.date) return;
-      const d = new Date(it.date);
-      const y = d.getFullYear();
-      const mi = MONTHS.indexOf(it.month);
-      if (mi < 0) return;
-      if (y === 2026) monthYearPresence[mi].has2026 = true;
-      if (y === 2025) monthYearPresence[mi].has2025 = true;
-    });
-  } catch {}
+  // Year-specific visual cues removed; will be handled via filter UI
   for (let m = 0; m < 12; m++) {
     const monthName = MONTHS[m];
     const monthSelected = !useHighlight || hlSet.has(monthName);
@@ -238,19 +222,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     if (isHl) txt.setAttribute('font-weight', '700');
     txt.addEventListener('click', () => callbacks.openMonth(monthName));
     svg.appendChild(txt);
-    // Year-based visual cue: subtle glow for months containing 2026 items (customer view)
-    if (isCustomerView && monthYearPresence[m].has2026) {
-      const yg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const rInY = rQuarterOuter + 4;
-      const rOutY = rMonthOuter - 4;
-      yg.setAttribute('d', segPath(cx, cy, rInY, rOutY, a1, a2));
-      yg.setAttribute('fill', '#ffffff');
-      yg.setAttribute('opacity', useHighlight && !hlSet.has(monthName) ? '0.06' : '0.10');
-      yg.setAttribute('filter', 'url(#monthGlow)');
-      yg.style.pointerEvents = 'none';
-      yg.classList.add('year-glow-2026');
-      svg.insertBefore(yg, txt); // ensure text stays above glow
-    }
+    // No year labels or glows; selection via filter button
   }
   // After drawing all months, mark focus quarters when highlightMonths exist
   if (Array.isArray(highlightMonths) && highlightMonths.length > 0) {
