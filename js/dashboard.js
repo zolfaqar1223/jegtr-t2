@@ -143,6 +143,27 @@ document.addEventListener('DOMContentLoaded', () => {
 	renderCategoryPie(items);
 	renderCategoryList(items);
 	renderTrend(items);
+	// Align heights between trend (Afsluttede pr. måned) and activities widget
+	function syncTrendHeight() {
+		const trend = document.getElementById('trendWidget');
+		const acts = document.getElementById('listSection');
+		if (!trend || !acts) return;
+		const actH = acts.getBoundingClientRect().height;
+		if (actH > 0) {
+			trend.style.maxHeight = actH + 'px';
+			trend.style.height = actH + 'px';
+			// Resize SVG to fit
+			const svg = document.getElementById('trendLine');
+			if (svg) {
+				const padTop = 48; // header and paddings
+				const innerH = Math.max(120, Math.round(actH - padTop));
+				svg.style.height = innerH + 'px';
+			}
+		}
+	}
+	// initial and on resize
+	setTimeout(syncTrendHeight, 50);
+	window.addEventListener('resize', () => setTimeout(syncTrendHeight, 50));
 
 	// Risks and resources
 	renderRisks(items);
