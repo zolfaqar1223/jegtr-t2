@@ -661,6 +661,8 @@ body.customer #listSection { grid-area: acts; }
   width: 100%;
   max-width: 820px;
   height: auto;
+  /* Nudge up and slightly left for centered feel */
+  transform: translate(-8px, -6px);
 }
 
 /* Customer readability improvements */
