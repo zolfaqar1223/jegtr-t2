@@ -271,9 +271,12 @@ document.addEventListener('DOMContentLoaded', () => {
     notes = readNotes();
   }
 
-  document.getElementById('btnPrintCustomer').addEventListener('click', () => {
-    window.print();
-  });
+  const printBtn = document.getElementById('btnPrintCustomer');
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
   // Start med samme pan/zoom som main, hvis tilgængelig
   try {
     const s = readSettings();
