@@ -523,8 +523,11 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     box.innerHTML = title + list;
     wrap.appendChild(box);
     // Draw thread for this quarter box (only for rendered ones)
-    // Quarter centerline angle
-    const a1 = { Q1: Math.PI*7/4, Q2: Math.PI*1/4, Q3: Math.PI*3/4, Q4: Math.PI*5/4 }[q];
+    // Quarter centerline angle computed from geometry (mid of quarter sector)
+    const qi = { Q1: 0, Q2: 1, Q3: 2, Q4: 3 }[q];
+    const qa1 = (2 * Math.PI) * (qi / 4) - Math.PI / 2;
+    const qa2 = (2 * Math.PI) * ((qi + 1) / 4) - Math.PI / 2;
+    const a1 = (qa1 + qa2) / 2;
     // Target point slightly INSIDE the week outer radius (so fade ends before wheel edge)
     const fadeStopPad = 28; // px inside wheel outer edge
     const rStop = Math.max(0, (rWeekOuter || size*0.46) - fadeStopPad);
@@ -541,17 +544,18 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     const boxBottom = bcr.bottom - wrapCR.top;
     const boxMidY = (boxTop + boxBottom) / 2;
     let startX, startY;
+    const edgeInset = 6; // px inside the box to avoid cutting the border/glow
     if (q === 'Q1' || q === 'Q2') {
       // Left edge, mid
-      startX = boxLeft;
+      startX = boxLeft + edgeInset;
       startY = boxMidY;
     } else if (q === 'Q3') {
       // Right edge, slightly above mid
-      startX = boxRight;
-      startY = boxMidY - 6;
+      startX = boxRight - edgeInset;
+      startY = boxMidY - 4;
     } else { // Q4
       // Right edge, mid
-      startX = boxRight;
+      startX = boxRight - edgeInset;
       startY = boxMidY;
     }
     // Build a gentle one-control-point curve (quadratic Bezier)
@@ -561,7 +565,7 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     const len = Math.hypot(vx, vy) || 1;
     const nx = -vy / len;
     const ny = vx / len;
-    const bow = 18; // px
+    const bow = 10; // px (gentle curve)
     // Bias bow direction away from the box (choose based on quarter)
     const dir = (q === 'Q1' || q === 'Q4') ? 1 : -1;
     const cx1 = startX + vx * 0.5 + nx * bow * dir;
@@ -591,8 +595,14 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     path.setAttribute('stroke', `url(#${gid})`);
     path.setAttribute('stroke-width', '2.2');
     path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('vector-effect', 'non-scaling-stroke');
     // Subtle glow
-    path.style.filter = 'drop-shadow(0 0 4px rgba(255,255,255,0.25))';
+    try {
+      const accent = getComputedStyle(wrap).getPropertyValue('--accent') || 'rgba(212,175,55,1)';
+      path.style.filter = `drop-shadow(0 0 6px ${String(accent).trim()})`;
+    } catch {
+      path.style.filter = 'drop-shadow(0 0 6px rgba(212,175,55,0.65))';
+    }
     threadSvg.appendChild(path);
   });
 }
