@@ -473,16 +473,24 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     Q3: { left: wrapCR.left + 12, top: wrapCR.bottom - 12 - 220 },
     Q4: { left: wrapCR.left + 12, top: wrapCR.top + 12 }
   };
+  const isCustomer = !!(document && document.body && document.body.classList && document.body.classList.contains('customer'));
   // Group items by quarter
   const byQ = { Q1:[], Q2:[], Q3:[], Q4:[] };
   items.forEach(it => { const q = it.quarter || inferQuarter(it.month); if (byQ[q]) byQ[q].push(it); });
   Object.keys(byQ).forEach(q => {
+    if (isCustomer && q !== 'Q2') return; // On customer view, only show Q2 bubble
     const box = document.createElement('div');
-    box.className = 'event-bubble show';
+    box.className = `event-bubble show quarter-box qbox-${q}`;
     box.style.minWidth = boxW + 'px';
     box.style.maxWidth = boxW + 'px';
-    box.style.left = (columns[q].left - wrapCR.left) + 'px';
-    box.style.top = (columns[q].top - wrapCR.top) + 'px';
+    if (q === 'Q2' && isCustomer) {
+      // Pin to bottom-right corner in customer view
+      box.style.right = '12px';
+      box.style.bottom = '12px';
+    } else {
+      box.style.left = (columns[q].left - wrapCR.left) + 'px';
+      box.style.top = (columns[q].top - wrapCR.top) + 'px';
+    }
     // Title
     const title = `<div class="heading" style="margin-bottom:6px;">${q}</div>`;
     // List
@@ -498,10 +506,9 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     }).join('');
     box.innerHTML = title + list;
     wrap.appendChild(box);
-    // Draw single quarter thread from quadrant midpoint to box edge
+    // Draw thread for this quarter box (only for rendered ones)
     const a1 = { Q1: Math.PI*7/4, Q2: Math.PI*1/4, Q3: Math.PI*3/4, Q4: Math.PI*5/4 }[q];
     const [qx, qy] = polar(cx, cy, size*0.30, a1);
-    // Transform to viewport (same as CSS transform)
     const rect = svg.getBoundingClientRect();
     const cX = rect.left + rect.width/2, cY = rect.top + rect.height/2;
     const qx0 = cX + (qx - cX)*zoom + panX;
