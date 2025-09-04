@@ -615,6 +615,12 @@ body.customer #listSection { grid-area: acts; }
   height: auto;
 }
 
+/* Enlarge non-bubble text for customer view for readability */
+body.customer h1 { font-size: 26px; }
+.customer .group-title { font-size: 16px; }
+.customer .item strong { font-size: 14px; }
+.customer .item .meta, .customer .item .note { font-size: 12px; }
+
 /* Read-only item modal for customer */
 .customer .viewer-modal {
   position: fixed;

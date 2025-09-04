@@ -56,6 +56,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   }
   // Use container width to avoid CSS transform affecting measurement
   const container = svg.parentElement;
+  const isCustomerView = !!(document && document.body && document.body.classList && document.body.classList.contains('customer'));
   // Ensure a bubble layer exists (absolute, shares transform with wheel)
   let bubbleLayer = container.querySelector('.bubble-layer');
   if (!bubbleLayer) {
@@ -97,7 +98,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   t1.setAttribute('text-anchor', 'middle');
   t1.setAttribute('dominant-baseline', 'middle');
   t1.setAttribute('alignment-baseline', 'middle');
-  t1.setAttribute('font-size', '16');
+  t1.setAttribute('font-size', isCustomerView ? '18' : '16');
   t1.setAttribute('font-weight', '600');
   t1.setAttribute('fill', '#ffffff');
   t1.textContent = 'Årshjul';
@@ -126,7 +127,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     txt.setAttribute('x', lx);
     txt.setAttribute('y', ly);
     txt.setAttribute('text-anchor', 'middle');
-    txt.setAttribute('font-size', '12');
+    txt.setAttribute('font-size', isCustomerView ? '14' : '12');
     txt.setAttribute('fill', '#ffffff');
     txt.textContent = ['Q1', 'Q2', 'Q3', 'Q4'][q];
     svg.appendChild(txt);
@@ -204,7 +205,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     txt.setAttribute('x', tx);
     txt.setAttribute('y', ty);
     txt.setAttribute('text-anchor', 'middle');
-    txt.setAttribute('font-size', '12');
+    txt.setAttribute('font-size', isCustomerView ? '14' : '12');
     txt.setAttribute('fill', isHl ? '#ffffff' : (useHighlight ? 'rgba(255,255,255,0.42)' : '#ffffff'));
     txt.textContent = monthName;
     txt.style.cursor = 'pointer';
