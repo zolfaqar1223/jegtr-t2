@@ -96,6 +96,12 @@ header .right button {
   justify-content: center;
   transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease, color 150ms ease;
 }
+/* Make ghost buttons in header look visually identical in size/fill */
+header .right .ghost {
+  background: var(--accent);
+  border: 1px solid transparent;
+  color: #ffffff;
+}
 /* Unify hover animation for both links and buttons */
 header .right a:hover,
 header .right button:hover {
