@@ -511,9 +511,12 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
       }).map((it, idx) => {
         const color = CAT_COLORS[it.cat] || 'var(--accent)';
         const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : `${it.month||''} · Uge ${it.isoWeek||it.week||''}`;
+        const tf = (it.timeFrom||'').trim();
+        const tt = (it.timeTo||'').trim();
+        const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
         const border = idx === 0 ? 'none' : '1px solid rgba(255,255,255,0.12)';
         return `<div class="q4-row" style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:8px 6px;border-top:${border};">
-          <div class="q4-date" style="font-weight:700;font-size:12px;opacity:.95;">${dateStr}</div>
+          <div class="q4-date" style="font-weight:700;font-size:12px;opacity:.95;">${dateStr}${tRange}</div>
           <div class="q4-body" style="display:flex;flex-direction:column;gap:4px;">
             <div style="font-weight:600;">${it.title}</div>
             <div class="meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;opacity:.9;font-size:11px;">

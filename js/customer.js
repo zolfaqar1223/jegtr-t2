@@ -132,7 +132,10 @@ function openViewer(item) {
   if (!viewerModal) return;
   viewerTitle.textContent = item.title;
   const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
-  viewerMeta.textContent = `${item.month} · ${dateStr} · ${item.cat}`;
+  const tf = (item.timeFrom||'').trim();
+  const tt = (item.timeTo||'').trim();
+  const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
+  viewerMeta.textContent = `${item.month} · ${dateStr}${tRange} · ${item.cat}`;
   viewerNote.textContent = item.note || '';
   // attachments
   if (viewerAttach) {
