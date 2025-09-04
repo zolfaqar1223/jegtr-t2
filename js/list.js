@@ -131,10 +131,14 @@ export function renderList(listEl, items, callbacks) {
     }
     el.querySelector('.item-content').appendChild(details);
 
-    // Grid layout for a bit more space
-    el.querySelector('.item-content').style.display = 'grid';
-    el.querySelector('.item-content').style.gridTemplateColumns = 'auto 1fr';
-    el.querySelector('.item-content').style.gap = '10px 14px';
+    // Ensure title is on its own line at the top
+    const contentEl = el.querySelector('.item-content');
+    contentEl.style.display = 'block';
+    const titleEl = el.querySelector('.title');
+    if (titleEl) {
+      titleEl.style.display = 'block';
+      titleEl.style.marginBottom = '4px';
+    }
 
     // Rediger
     el.querySelector('[data-act="edit"]').addEventListener('click', () => {
