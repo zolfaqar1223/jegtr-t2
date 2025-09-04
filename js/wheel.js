@@ -29,29 +29,33 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   try { console.debug('[YearWheel] draw', Array.isArray(items) ? items.length : 'ukendt'); } catch {}
   // Ryd tidligere indhold
   svg.innerHTML = '';
-  if (showBubbles) {
+  // Always provide a soft blur filter for month glows
+  {
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
-    grad.setAttribute('id', 'hlGrad');
-    grad.setAttribute('cx', '50%');
-    grad.setAttribute('cy', '50%');
-    grad.setAttribute('r', '60%');
-    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop1.setAttribute('offset', '0%');
-    stop1.setAttribute('stop-color', '#ffffff');
-    stop1.setAttribute('stop-opacity', '0.30');
-    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop2.setAttribute('offset', '100%');
-    stop2.setAttribute('stop-color', '#ffffff');
-    stop2.setAttribute('stop-opacity', '0');
-    grad.appendChild(stop1); grad.appendChild(stop2);
-    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    filter.setAttribute('id', 'softGlow');
-    const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-    blur.setAttribute('stdDeviation', '3');
-    blur.setAttribute('result', 'coloredBlur');
-    filter.appendChild(blur);
-    defs.appendChild(grad); defs.appendChild(filter);
+    if (showBubbles) {
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+      grad.setAttribute('id', 'hlGrad');
+      grad.setAttribute('cx', '50%');
+      grad.setAttribute('cy', '50%');
+      grad.setAttribute('r', '60%');
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop1.setAttribute('offset', '0%');
+      stop1.setAttribute('stop-color', '#ffffff');
+      stop1.setAttribute('stop-opacity', '0.30');
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop2.setAttribute('offset', '100%');
+      stop2.setAttribute('stop-color', '#ffffff');
+      stop2.setAttribute('stop-opacity', '0');
+      grad.appendChild(stop1); grad.appendChild(stop2);
+      defs.appendChild(grad);
+    }
+    const monthGlow = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    monthGlow.setAttribute('id', 'monthGlow');
+    const blur2 = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+    blur2.setAttribute('stdDeviation', '1.8');
+    blur2.setAttribute('result', 'blurOut');
+    monthGlow.appendChild(blur2);
+    defs.appendChild(monthGlow);
     svg.appendChild(defs);
   }
   // Use container width to avoid CSS transform affecting measurement
@@ -234,47 +238,18 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     if (isHl) txt.setAttribute('font-weight', '700');
     txt.addEventListener('click', () => callbacks.openMonth(monthName));
     svg.appendChild(txt);
-    // Year markers (customer view only)
-    if (isCustomerView) {
-      const mid = (a1 + a2) / 2;
-      const has26 = monthYearPresence[m].has2026;
-      const has25 = monthYearPresence[m].has2025 && !has26; // prefer showing 2026 if both exist
-      if (has26 || has25) {
-        const rStart = rMonthOuter + 6;
-        const rEnd = rMonthOuter + 20;
-        const rText = rMonthOuter + 30;
-        const [lx1, ly1] = polar(cx, cy, rStart, mid);
-        const [lx2, ly2] = polar(cx, cy, rEnd, mid);
-        const [tx2, ty2] = polar(cx, cy, rText, mid);
-        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        tick.setAttribute('x1', lx1);
-        tick.setAttribute('y1', ly1);
-        tick.setAttribute('x2', lx2);
-        tick.setAttribute('y2', ly2);
-        tick.setAttribute('stroke-linecap', 'round');
-        tick.setAttribute('stroke-width', '1');
-        tick.setAttribute('stroke', has26 ? 'rgba(255,255,255,0.38)' : 'rgba(255,255,255,0.60)');
-        tick.setAttribute('opacity', has26 ? '0.40' : '0.70');
-        tick.classList.add('year-tick');
-        tick.style.transition = 'opacity 220ms ease, stroke 220ms ease';
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', tx2);
-        label.setAttribute('y', ty2);
-        label.setAttribute('text-anchor', 'middle');
-        label.setAttribute('font-size', '10');
-        label.setAttribute('fill', has26 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.78)');
-        label.setAttribute('opacity', has26 ? '0.55' : '0.85');
-        label.textContent = has26 ? '2026' : '2025';
-        label.classList.add('year-label');
-        label.style.transition = 'opacity 220ms ease';
-        // Hover emphasis on month
-        const hoverIn = () => { tick.setAttribute('opacity', '0.95'); label.setAttribute('opacity', '0.95'); };
-        const hoverOut = () => { tick.setAttribute('opacity', has26 ? '0.40' : '0.70'); label.setAttribute('opacity', has26 ? '0.55' : '0.85'); };
-        path.addEventListener('mouseenter', hoverIn);
-        path.addEventListener('mouseleave', hoverOut);
-        svg.appendChild(tick);
-        svg.appendChild(label);
-      }
+    // Year-based visual cue: subtle glow for months containing 2026 items (customer view)
+    if (isCustomerView && monthYearPresence[m].has2026) {
+      const yg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const rInY = rQuarterOuter + 4;
+      const rOutY = rMonthOuter - 4;
+      yg.setAttribute('d', segPath(cx, cy, rInY, rOutY, a1, a2));
+      yg.setAttribute('fill', '#ffffff');
+      yg.setAttribute('opacity', useHighlight && !hlSet.has(monthName) ? '0.06' : '0.10');
+      yg.setAttribute('filter', 'url(#monthGlow)');
+      yg.style.pointerEvents = 'none';
+      yg.classList.add('year-glow-2026');
+      svg.insertBefore(yg, txt); // ensure text stays above glow
     }
   }
   // After drawing all months, mark focus quarters when highlightMonths exist
