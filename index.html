@@ -30,11 +30,11 @@
         </label>
         <label for="timeFrom" style="flex:0 0 auto;">
           Fra
-          <input id="timeFrom" type="time" lang="da-DK" min="00:00" max="23:59" step="60" placeholder="00:00" />
+          <input id="timeFrom" type="text" inputmode="numeric" pattern="^([01]\\d|2[0-3]):[0-5]\\d$" placeholder="00:00" aria-label="Fra tidspunkt (HH:MM)" />
         </label>
         <label for="timeTo" style="flex:0 0 auto;">
           Til
-          <input id="timeTo" type="time" lang="da-DK" min="00:00" max="23:59" step="60" placeholder="00:00" />
+          <input id="timeTo" type="text" inputmode="numeric" pattern="^([01]\\d|2[0-3]):[0-5]\\d$" placeholder="00:00" aria-label="Til tidspunkt (HH:MM)" />
         </label>
       </div>
       <label for="title">Aktivitet

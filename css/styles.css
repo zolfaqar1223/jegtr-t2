@@ -231,6 +231,8 @@ textarea {
 input[type="time"] {
   font-variant-numeric: tabular-nums;
 }
+/* Visual hint for text time fields */
+input#timeFrom,input#timeTo { width: 110px; text-align: center; }
 .sheet #shareList .share-row { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; }
 .sheet #shareList .share-row:hover { background: rgba(255,255,255,0.04); }
 .sheet #shareList .title { font-weight:600; font-size:13px; }

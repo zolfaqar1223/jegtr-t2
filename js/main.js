@@ -675,7 +675,7 @@ function render() {
       const ttEl = document.getElementById('timeTo');
       if (tfEl) tfEl.value = tf || '';
       if (ttEl) ttEl.value = tt || '';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Do not auto-scroll to top when editing; keep user context
     },
     onOpen: monthName => {
       focusedMonth = monthName;
