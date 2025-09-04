@@ -105,8 +105,9 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   t2.setAttribute('text-anchor', 'middle');
   t2.setAttribute('font-size', '11');
   t2.setAttribute('fill', '#ffffff');
-  t2.textContent = String(new Date().getFullYear());
-  svg.appendChild(t2);
+  // Year label removed per spec
+  // t2.textContent = String(new Date().getFullYear());
+  // svg.appendChild(t2);
   // Kvartalernes baggrunde og labels
   for (let q = 0; q < 4; q++) {
     const a1 = (2 * Math.PI) * (q / 4) - Math.PI / 2;
@@ -474,23 +475,8 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     Q4: { left: wrapCR.left + 12, top: wrapCR.top + 12 }
   };
   const isCustomer = !!(document && document.body && document.body.classList && document.body.classList.contains('customer'));
-  // Prepare an SVG layer for curved quarter threads
-  let threadSvg = wrap.querySelector('svg.quarter-thread-layer');
-  if (!threadSvg) {
-    threadSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    threadSvg.classList.add('quarter-thread-layer');
-    threadSvg.setAttribute('width', String(wrapCR.width));
-    threadSvg.setAttribute('height', String(wrapCR.height));
-    threadSvg.style.position = 'absolute';
-    threadSvg.style.inset = '0';
-    threadSvg.style.pointerEvents = 'none';
-    wrap.appendChild(threadSvg);
-  } else {
-    // Resize and clear
-    threadSvg.setAttribute('width', String(wrapCR.width));
-    threadSvg.setAttribute('height', String(wrapCR.height));
-    while (threadSvg.firstChild) threadSvg.removeChild(threadSvg.firstChild);
-  }
+  // Lines disabled: we skip creating a thread layer
+  const DRAW_THREADS = false;
   // Group items by quarter
   const byQ = { Q1:[], Q2:[], Q3:[], Q4:[] };
   items.forEach(it => { const q = it.quarter || inferQuarter(it.month); if (byQ[q]) byQ[q].push(it); });
@@ -568,40 +554,10 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     const verticalBiasY = (q === 'Q1' || q === 'Q4') ? 8 : -8;
     const cx1 = startX + vx * 0.5 + sideBiasX;
     const cy1 = startY + vy * 0.5 + verticalBiasY;
-    // Gradient for stroke from start(opaque) to end(transparent)
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    const gid = `qgrad_${q}`;
-    grad.setAttribute('id', gid);
-    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
-    grad.setAttribute('x1', String(startX));
-    grad.setAttribute('y1', String(startY));
-    grad.setAttribute('x2', String(endX));
-    grad.setAttribute('y2', String(endY));
-    const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    s1.setAttribute('offset', '0%');
-    s1.setAttribute('stop-color', 'rgba(255,255,255,0.85)');
-    const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    s2.setAttribute('offset', '100%');
-    s2.setAttribute('stop-color', 'rgba(255,255,255,0)');
-    grad.appendChild(s1); grad.appendChild(s2);
-    defs.appendChild(grad);
-    threadSvg.appendChild(defs);
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M ${startX} ${startY} Q ${cx1} ${cy1} ${endX} ${endY}`);
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', `url(#${gid})`);
-    path.setAttribute('stroke-width', '2.2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('vector-effect', 'non-scaling-stroke');
-    // Subtle glow
-    try {
-      const accent = getComputedStyle(wrap).getPropertyValue('--accent') || 'rgba(212,175,55,1)';
-      path.style.filter = `drop-shadow(0 0 6px ${String(accent).trim()})`;
-    } catch {
-      path.style.filter = 'drop-shadow(0 0 6px rgba(212,175,55,0.65))';
+    // Threads are disabled entirely
+    if (!DRAW_THREADS) {
+      return;
     }
-    threadSvg.appendChild(path);
   });
 }
 
