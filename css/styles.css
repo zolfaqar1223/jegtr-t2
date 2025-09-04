@@ -97,6 +97,7 @@ header .right button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 /* Make ghost buttons in header look visually identical in size/fill */
@@ -109,7 +110,7 @@ header .right .ghost {
 header .right a:hover,
 header .right button:hover {
   border-color: var(--accent);
-  color: var(--accent);
+  color: #ffffff;
   box-shadow:
     0 0 0 1px var(--accent) inset,
     0 0 12px var(--neon),
@@ -140,7 +141,7 @@ header .right a#btnBack {
 }
 header .right a#btnBack:hover {
   border-color: var(--accent);
-  color: var(--accent);
+  color: #ffffff;
   box-shadow:
     0 0 0 1px var(--accent) inset,
     0 0 12px var(--neon);
@@ -148,7 +149,7 @@ header .right a#btnBack:hover {
 }
 header .right a#btnDashboard:hover {
   border-color: var(--accent);
-  color: var(--bg);
+  color: #ffffff;
   box-shadow:
     0 0 0 1px var(--accent) inset,
     0 0 12px var(--neon),
@@ -176,7 +177,7 @@ button.ghost {
 
 button.ghost:hover {
   border-color: var(--accent);
-  color: var(--accent);
+  color: #ffffff;
 }
 
 .import-label {
@@ -557,7 +558,7 @@ svg {
 }
 .item button[data-act="del"]:hover {
   background: #ff6b6b;
-  color: var(--bg);
+  color: #ffffff;
 }
 
 .item button.ghost {
