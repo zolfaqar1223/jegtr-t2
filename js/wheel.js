@@ -464,7 +464,7 @@ function emphasizeBubble(svg, item, on) {
 function renderQuarterBoxes(svg, layer, items, geom, transform) {
   const wrap = layer.parentElement; if (!wrap) return;
   const wrapCR = wrap.getBoundingClientRect();
-  const { cx, cy, size } = geom; const { panX, panY, zoom } = transform;
+  const { cx, cy, size, rWeekOuter } = geom; const { panX, panY, zoom } = transform;
   // Positions for Q1..Q4 boxes (relative to wrap), corners outside wheel
   const boxW = Math.min(280, wrapCR.width * 0.26), boxPad = 12;
   const columns = {
@@ -507,7 +507,10 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     wrap.appendChild(box);
     // Draw thread for this quarter box (only for rendered ones)
     const a1 = { Q1: Math.PI*7/4, Q2: Math.PI*1/4, Q3: Math.PI*3/4, Q4: Math.PI*5/4 }[q];
-    const [qx, qy] = polar(cx, cy, size*0.30, a1);
+    // Anchor slightly OUTSIDE the wheel and fade towards it (transparent near inner end)
+    const innerMargin = 10; // px from wheel edge
+    const rAnchor = (rWeekOuter || size*0.46) + innerMargin;
+    const [qx, qy] = polar(cx, cy, rAnchor, a1);
     const rect = svg.getBoundingClientRect();
     const cX = rect.left + rect.width/2, cY = rect.top + rect.height/2;
     const qx0 = cX + (qx - cX)*zoom + panX;
@@ -519,7 +522,10 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     line.className = 'event-thread';
     line.style.left = (qx0 - wrapCR.left) + 'px';
     line.style.top  = (qy0 - wrapCR.top) + 'px';
-    line.style.width = Math.hypot(x2 - qx0, y2 - qy0) + 'px';
+    // Shorten a touch near the inner end so it visually stops before the wheel
+    const fullLen = Math.hypot(x2 - qx0, y2 - qy0);
+    const trim = 6; // px
+    line.style.width = Math.max(0, fullLen - trim) + 'px';
     line.style.transformOrigin = '0 0';
     line.style.transform = `rotate(${Math.atan2(y2-qy0, x2-qx0)*180/Math.PI}deg)`;
     wrap.appendChild(line);
