@@ -60,14 +60,7 @@ header {
   z-index: 10;
 }
 
-header .logo {
-  width: 108px;
-  height: 36px;
-  display: inline-block;
-  background: var(--q2);
-  border-radius: 6px;
-  position: relative;
-}
+header .logo { display: none; }
 header .logo::after {
   content: "";
   position: absolute;
