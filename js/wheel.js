@@ -579,6 +579,9 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     }).join('');
     if (arr.length === 0) {
       rows = `<div class="empty">Ingen aktiviteter</div>`;
+      box.classList.add('empty');
+    } else {
+      box.classList.remove('empty');
     }
     box.innerHTML = title + rows;
     wrap.appendChild(box);

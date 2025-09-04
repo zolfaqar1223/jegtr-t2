@@ -796,6 +796,10 @@ body.customer h1 { font-size: 26px; }
   z-index: 55;
 }
 .quarter-box { min-width: 240px; max-width: 320px; }
+.quarter-box.empty { opacity: 0; transition: opacity 320ms cubic-bezier(.4,.0,.2,1); pointer-events: none; }
+
+/* Premium focus look when sharing selected quarters */
+.wheel-wrap.focused svg .is-focus { filter: drop-shadow(0 0 12px rgba(255,255,255,0.25)); }
 
 @media (max-width: 640px) {
   .event-bubble {
