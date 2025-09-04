@@ -76,6 +76,8 @@ header h1 {
   font-size: 20px;
   font-weight: 700;
 }
+/* Hide top title specifically on customer view */
+body.customer header h1 { display:none; }
 
 header .right {
   margin-left: auto;

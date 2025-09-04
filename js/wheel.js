@@ -92,19 +92,17 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
   center.setAttribute('stroke', 'var(--muted)');
   svg.appendChild(center);
   // Midtertekst
-  if (!isCustomerView) {
-    const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    t1.setAttribute('x', cx);
-    t1.setAttribute('y', cy);
-    t1.setAttribute('text-anchor', 'middle');
-    t1.setAttribute('dominant-baseline', 'middle');
-    t1.setAttribute('alignment-baseline', 'middle');
-    t1.setAttribute('font-size', '16');
-    t1.setAttribute('font-weight', '600');
-    t1.setAttribute('fill', '#ffffff');
-    t1.textContent = 'Årshjul';
-    svg.appendChild(t1);
-  }
+  const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  t1.setAttribute('x', cx);
+  t1.setAttribute('y', cy);
+  t1.setAttribute('text-anchor', 'middle');
+  t1.setAttribute('dominant-baseline', 'middle');
+  t1.setAttribute('alignment-baseline', 'middle');
+  t1.setAttribute('font-size', isCustomerView ? '18' : '16');
+  t1.setAttribute('font-weight', '600');
+  t1.setAttribute('fill', '#ffffff');
+  t1.textContent = 'Årshjul';
+  svg.appendChild(t1);
   const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   t2.setAttribute('x', cx);
   t2.setAttribute('y', cy + 14);
@@ -300,20 +298,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
           requestAnimationFrame(() => callbacks.openMonth(monthName));
         }
       });
-      // Quick hover detail without click
-      g.addEventListener('mouseenter', () => {
-        const approxMonthIndex = Math.floor((i * 12) / 52);
-        const monthName = MONTHS[approxMonthIndex];
-        const segInMonth = i - Math.round(approxMonthIndex * 52 / 12);
-        const weekNum = Math.max(1, Math.min(5, Math.round((segInMonth * 4) / (52 / 12)) + 1));
-        const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === approxMonthIndex && x.week === weekNum);
-        if (itemsInSeg.length === 0) return;
-        const color = weekColors[i] || 'var(--accent)';
-        const rect = svg.getBoundingClientRect();
-        const px = rect.left + rect.width/2; // simple anchor near center
-        const py = rect.top + rect.height/2;
-        createPersistentBubble(svg.parentElement, rect.left + rect.width/2, rect.top + rect.height/2, bx, by, itemsInSeg[0], color, 0);
-      });
+      // Removed hover bubble; details open on click only
       svg.appendChild(g);
 
       // Persistent info bubbles per activity (disabled when quarter boxes are used)
