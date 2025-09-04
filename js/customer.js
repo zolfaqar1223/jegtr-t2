@@ -67,7 +67,7 @@ function renderListReadOnly(listEl, itemsToShow) {
       const timeFrom = (it.timeFrom||'').trim();
       const timeTo = (it.timeTo||'').trim();
       const timeStr = timeFrom && timeTo ? `${timeFrom}-${timeTo}` : '';
-      const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : ` · Uge ${it.week}`;
+      const weekStr = it.isoWeek ? ` · Uge ${it.isoWeek}` : '';
       meta.innerHTML = `${badge}${it.month}${weekStr} · ${dateStr}${timeStr?` · ${timeStr}`:''}`;
       const note = document.createElement('div');
       note.className = 'note';
@@ -441,7 +441,7 @@ function renderNext(arr) {
   const it = (idx && idx.i) || arr[0];
   nextBox.className = 'item glass';
   const color = CAT_COLORS[it.cat] || 'var(--accent)';
-  const weekStr = it.isoWeek ? `Uge ${it.isoWeek}` : `Uge ${it.week}`;
+  const weekStr = it.isoWeek ? `Uge ${it.isoWeek}` : '';
   const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
   const tf = (it.timeFrom||'').trim();
   const tt = (it.timeTo||'').trim();

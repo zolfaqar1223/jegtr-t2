@@ -390,7 +390,7 @@ function setupShareModal() {
         cat.style.color = c;
         cat.textContent = it.cat;
         const details = document.createElement('span');
-        details.textContent = `Uge ${it.week}${it.owner ? ' · ' + it.owner : ''}`;
+        details.textContent = `${it.owner ? it.owner : ''}`;
         metaLeft.appendChild(cat);
         metaLeft.appendChild(details);
         const metaRight = document.createElement('div');

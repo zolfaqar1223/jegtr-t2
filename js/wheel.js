@@ -6,6 +6,7 @@
 
 import { MONTHS, CAT_COLORS, STATUS_COLORS } from './store.js';
 import { polar, segPath } from './utils.js';
+import { getIsoWeek } from './utils.js';
 
 /**
  * Tegn årshjulet i et givet SVG‑element.
@@ -540,7 +541,7 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
       return `<div class="q-row" style="padding:8px 6px;border-top:${border};">
         <div class="meta" style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;">
           <span style="font-weight:600;">${it.title}</span>
-          <span>Uge ${it.isoWeek||it.week}${dateStr?` · ${dateStr}`:''}${tRange}</span>
+          <span>${it.isoWeek?`Uge ${it.isoWeek}`:''}${dateStr?` · ${dateStr}`:''}${tRange}</span>
           <span class="badge cat" style="border-color:${color};color:${color};">${it.cat}</span>
           <span class="badge status">${it.status||'Planlagt'}</span>
         </div>
