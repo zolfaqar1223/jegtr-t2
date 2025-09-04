@@ -561,15 +561,13 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     // Build a gentle one-control-point curve (quadratic Bezier)
     const vx = endX - startX;
     const vy = endY - startY;
-    // Perpendicular normal for bowing
-    const len = Math.hypot(vx, vy) || 1;
-    const nx = -vy / len;
-    const ny = vx / len;
-    const bow = 10; // px (gentle curve)
-    // Bias bow direction away from the box (choose based on quarter)
-    const dir = (q === 'Q1' || q === 'Q4') ? 1 : -1;
-    const cx1 = startX + vx * 0.5 + nx * bow * dir;
-    const cy1 = startY + vy * 0.5 + ny * bow * dir;
+    // Place control near mid with directional bias following the red guides:
+    // right-side boxes (Q1,Q2) bias left; left-side (Q3,Q4) bias right.
+    // top quadrants (Q1,Q4) bias slightly downward; bottom (Q2,Q3) slightly upward.
+    const sideBiasX = (q === 'Q1' || q === 'Q2') ? -12 : 12;
+    const verticalBiasY = (q === 'Q1' || q === 'Q4') ? 8 : -8;
+    const cx1 = startX + vx * 0.5 + sideBiasX;
+    const cy1 = startY + vy * 0.5 + verticalBiasY;
     // Gradient for stroke from start(opaque) to end(transparent)
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
