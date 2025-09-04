@@ -24,6 +24,7 @@ let items = [];
 let notes = {};
 let highlightMonths = [];
 // Zoom og pan er fjernet i kundevisning
+const DEFAULT_ZOOM = 0.8; // vis let nedskaleret som på main
 // no timeline renderer
 
 function renderListReadOnly(listEl, itemsToShow) {
@@ -191,8 +192,9 @@ function render(focusedMonth = null) {
       wheelSvg.appendChild(txt);
     }
   }
-  // Ingen zoom/pan i kundevisning
-  wheelSvg.style.transform = '';
+  // Statisk let zoom-ud for at matche main (centreret)
+  wheelSvg.style.transformOrigin = '50% 50%';
+  wheelSvg.style.transform = `scale(${DEFAULT_ZOOM})`;
   const listItems = focusedMonth ? items.filter(x => x.month === focusedMonth) : items;
   renderListReadOnly(listContainer, listItems);
   // Månedsnoter vises ikke i kundevisning
