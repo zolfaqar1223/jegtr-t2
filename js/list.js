@@ -5,6 +5,41 @@
 
 import { sortItems, CAT_COLORS, STATUS_COLORS } from './store.js';
 
+// Darken a hex color by a given amount (0..1)
+function darkenHex(hex, amount = 0.35) {
+  try {
+    const norm = String(hex).trim();
+    if (!/^#?[0-9a-fA-F]{6}$/.test(norm)) return hex;
+    const h = norm.startsWith('#') ? norm.slice(1) : norm;
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    const f = Math.max(0, Math.min(1, amount));
+    const rd = Math.max(0, Math.min(255, Math.round(r * (1 - f))));
+    const gd = Math.max(0, Math.min(255, Math.round(g * (1 - f))));
+    const bd = Math.max(0, Math.min(255, Math.round(b * (1 - f))));
+    const toHex = (n) => n.toString(16).padStart(2, '0');
+    return `#${toHex(rd)}${toHex(gd)}${toHex(bd)}`;
+  } catch {
+    return hex;
+  }
+}
+
+function pickTextColorForHexBackground(hex) {
+  try {
+    const norm = String(hex).trim();
+    const h = norm.startsWith('#') ? norm.slice(1) : norm;
+    if (h.length !== 6) return '#ffffff';
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 140 ? '#0A1B2A' : '#ffffff';
+  } catch {
+    return '#ffffff';
+  }
+}
+
 /**
  * Render aktiviteter i en given container.
  * @param {HTMLElement} listEl Beholder hvor elementerne skal indsættes
@@ -31,13 +66,19 @@ export function renderList(listEl, items, callbacks) {
     badge.textContent = it.cat;
     badge.style.marginRight = '10px';
     const color = CAT_COLORS[it.cat] || 'var(--accent)';
-    badge.style.background = color;
-    badge.style.borderColor = color;
+    const darkerCatBg = darkenHex(color, 0.35);
+    const darkerCatBorder = darkenHex(color, 0.45);
+    badge.style.background = darkerCatBg;
+    badge.style.borderColor = darkerCatBorder;
+    badge.style.color = pickTextColorForHexBackground(darkerCatBg);
     const statusBadge = document.createElement('span');
     statusBadge.className = 'badge status';
     const sColor = STATUS_COLORS[it.status || 'Planlagt'] || '#999';
-    statusBadge.style.background = sColor;
-    statusBadge.style.borderColor = sColor;
+    const darkerStatusBg = darkenHex(sColor, 0.35);
+    const darkerStatusBorder = darkenHex(sColor, 0.45);
+    statusBadge.style.background = darkerStatusBg;
+    statusBadge.style.borderColor = darkerStatusBorder;
+    statusBadge.style.color = pickTextColorForHexBackground(darkerStatusBg);
     statusBadge.textContent = it.status || 'Planlagt';
     // Missing owner badge
     if (!it.owner || String(it.owner).trim() === '') {
