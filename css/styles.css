@@ -496,8 +496,8 @@ svg {
   border-radius: 14px;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "content actions";
+  grid-template-columns: 1fr 320px;
+  grid-template-areas: "content note";
   align-items: start;
   column-gap: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.16);
@@ -517,6 +517,21 @@ svg {
   flex: 1 1 auto;
   min-width: 0;
   grid-area: content;
+}
+.note-box {
+  grid-area: note;
+  align-self: stretch;
+  min-width: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+}
+.note-box .note { margin: 0; font-size: 11px; opacity: .95; }
+
+@media (max-width: 900px) {
+  .item { grid-template-columns: 1fr; grid-template-areas: "content" "note"; }
 }
 
 .item strong {

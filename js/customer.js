@@ -72,7 +72,7 @@ function renderListReadOnly(listEl, itemsToShow) {
       meta.innerHTML = `${badge}${it.month}${weekStr} · ${dateStr}${timeStr?` · ${timeStr}`:''}`;
       const note = document.createElement('div');
       note.className = 'note';
-      note.textContent = (it.note && it.note.trim().length) ? it.note : 'Ingen noter tilføjet endnu';
+      note.textContent = (it.note && it.note.trim().length) ? it.note : '';
       // attachments
       const attach = document.createElement('div');
       attach.className = 'attachments';
@@ -110,9 +110,15 @@ function renderListReadOnly(listEl, itemsToShow) {
       }
       content.appendChild(title);
       content.appendChild(meta);
-      if (it.note) content.appendChild(note);
       if (attach.children.length) content.appendChild(attach);
       el.appendChild(content);
+      // Note box on the right inside the same activity card
+      const noteBox = document.createElement('div');
+      noteBox.className = 'note-box';
+      if (note.textContent.trim().length) {
+        noteBox.appendChild(note);
+      }
+      el.appendChild(noteBox);
       el.style.cursor = 'pointer';
       el.addEventListener('click', () => openViewerById(it));
       listEl.appendChild(el);
