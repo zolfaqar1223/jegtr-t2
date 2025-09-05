@@ -685,6 +685,22 @@ function render() {
     },
     onDelete: id => {
       deleteItem(id);
+    },
+    onDuplicate: item => {
+      try {
+        const copy = { ...item };
+        // assign new id and timestamps; keep same date/time/month/week/owner/cat/status/note/attachments
+        copy.id = generateId();
+        copy.createdAt = new Date().toISOString();
+        copy.updatedAt = copy.createdAt;
+        items.push(copy);
+        writeItems(items);
+        render();
+        showToast('Aktivitet duplikeret', 'success');
+        logChange(`Duplikerede aktivitet: ${item.title}`, { type: 'duplicate', sourceId: item.id, newId: copy.id });
+      } catch (e) {
+        showToast('Kunne ikke duplikere', 'error');
+      }
     }
   });
 

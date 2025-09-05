@@ -48,6 +48,7 @@ function pickTextColorForHexBackground(hex) {
  *   - onEdit(item)
  *   - onOpen(monthName)
  *   - onDelete(id)
+ *   - onDuplicate(item)
  */
 export function renderList(listEl, items, callbacks) {
   listEl.innerHTML = '';
@@ -147,6 +148,13 @@ export function renderList(listEl, items, callbacks) {
     el.querySelector('[data-act="edit"]').addEventListener('click', () => {
       callbacks.onEdit(it);
     });
+    // Duplikér
+    const dupBtn = el.querySelector('[data-act="dup"]');
+    if (dupBtn) {
+      dupBtn.addEventListener('click', () => {
+        if (callbacks.onDuplicate) callbacks.onDuplicate(it);
+      });
+    }
     // Slet
     el.querySelector('[data-act="del"]').addEventListener('click', () => {
       callbacks.onDelete(it.id);
