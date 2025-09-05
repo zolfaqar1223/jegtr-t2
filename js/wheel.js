@@ -237,19 +237,23 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     };
     [...svg.querySelectorAll('.quarter-bg'), ...svg.querySelectorAll('.quarter-hl'), ...svg.querySelectorAll('.quarter-label')].forEach(markFocus);
   }
-  // Beregn ugetællinger (52 segmenter) og farver baseret på kategori
-  const weekCounts = new Array(52).fill(0);
-  const weekColors = new Array(52).fill(null);
+  // Beregn tællinger pr. måned/uge for præcis placering i korrekt måned
+  const monthWeekCounts = new Map(); // key `${mIndex}-${w}` -> {count,color}
   items.forEach(it => {
     const mIndex = MONTHS.indexOf(it.month);
-    const baseIndex = mIndex * 4 + (it.week - 1);
-    const scaled = Math.round(baseIndex * 52 / 48);
-    const idx = Math.min(scaled, 51);
-    weekCounts[idx]++;
-    // Sæt farve – seneste farve vinder; kunne udvides til mix, men simpelt for nu
-    weekColors[idx] = CAT_COLORS[it.cat] || 'var(--accent)';
+    if (mIndex < 0) return;
+    let weekInMonth = Number(it.week) || 1;
+    // Foretræk dag i måned hvis dato findes, for mere præcis uge (1..5)
+    if (it.date) {
+      const d = new Date(it.date);
+      if (!isNaN(d.getTime())) weekInMonth = Math.max(1, Math.min(5, Math.ceil(d.getDate() / 7)));
+    }
+    const key = `${mIndex}-${weekInMonth}`;
+    const color = CAT_COLORS[it.cat] || 'var(--accent)';
+    const prev = monthWeekCounts.get(key) || { count: 0, color: null };
+    monthWeekCounts.set(key, { count: prev.count + 1, color });
   });
-  // Tegn 52 ugesegmenter
+  // Tegn 52 ugesegmenter (kun som droppunkter/linjer, ikke til markørberegning)
   for (let i = 0; i < 52; i++) {
     const a1 = (2 * Math.PI) * (i / 52) - Math.PI / 2;
     const a2 = (2 * Math.PI) * ((i + 1) / 52) - Math.PI / 2;
@@ -271,13 +275,26 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       callbacks.moveItemToMonthWeek(id, monthName, weekNum);
     });
     svg.appendChild(path);
-    const count = weekCounts[i];
-    if (count > 0) {
-      const mid = (a1 + a2) / 2;
+    // markers bygges separat nedenfor baseret på måned/uge-buckets
+  }
+
+  // Markører pr. måned/uge – præcis placering i rigtig måned
+  for (let m = 0; m < 12; m++) {
+    const monthName = MONTHS[m];
+    if (restrictMonths && useHighlight && !hlSet.has(monthName)) continue;
+    const a1m = (2 * Math.PI) * (m / 12) - Math.PI / 2;
+    const a2m = (2 * Math.PI) * ((m + 1) / 12) - Math.PI / 2;
+    const arcM = a2m - a1m;
+    const daysInMonth = new Date(new Date().getFullYear(), m + 1, 0).getDate();
+    const weeksInMonth = Math.max(4, Math.min(5, Math.ceil(daysInMonth / 7)));
+    for (let w = 1; w <= weeksInMonth; w++) {
+      const bucket = monthWeekCounts.get(`${m}-${w}`);
+      if (!bucket || bucket.count <= 0) continue;
+      const mid = a1m + arcM * ((w - 0.5) / weeksInMonth);
       const [bx, by] = polar(cx, cy, (rMonthOuter + rWeekOuter) / 2, mid);
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.classList.add('marker');
-      const isWeekHighlighted = useHighlight ? hlSet.has(MONTHS[approxMonthIndex]) : true;
+      const isWeekHighlighted = useHighlight ? hlSet.has(monthName) : true;
       if (useHighlight && !isWeekHighlighted) {
         g.setAttribute('opacity', '0.35');
         g.style.transform = 'scale(0.97)';
@@ -287,7 +304,7 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       c.setAttribute('cx', bx);
       c.setAttribute('cy', by);
       c.setAttribute('r', 14);
-      const dotColor = weekColors[i] || 'var(--accent)';
+      const dotColor = bucket.color || 'var(--accent)';
       c.setAttribute('fill', dotColor);
       c.setAttribute('stroke', 'rgba(255,255,255,0.85)');
       c.setAttribute('stroke-width', '1');
@@ -307,45 +324,15 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
       tt.setAttribute('font-size', '12');
       tt.setAttribute('font-weight', '700');
       tt.setAttribute('fill', '#ffffff');
-      tt.textContent = String(count);
+      tt.textContent = String(bucket.count);
       g.appendChild(tt);
       g.style.cursor = 'pointer';
       g.addEventListener('click', () => {
-        const approxMonthIndex = Math.floor((i * 12) / 52);
-        const monthName = MONTHS[approxMonthIndex];
-        const segInMonth = i - Math.round(approxMonthIndex * 52 / 12);
-        const weekNum = Math.max(1, Math.min(5, Math.round((segInMonth * 4) / (52 / 12)) + 1));
-        if (callbacks.openWeek) {
-          // Defer to next frame for smoother UI and to avoid size jank
-          requestAnimationFrame(() => callbacks.openWeek(monthName, weekNum));
-        } else {
-          requestAnimationFrame(() => callbacks.openMonth(monthName));
-        }
+        if (callbacks.openWeek) requestAnimationFrame(() => callbacks.openWeek(monthName, w));
+        else requestAnimationFrame(() => callbacks.openMonth(monthName));
       });
-      // Removed hover bubble; details open on click only
       svg.appendChild(g);
-
-      // Persistent info bubbles per activity (disabled when quarter boxes are used)
-      if (showBubbles && !showQuarterBoxes) {
-        const mi = Math.floor((i * 12) / 52);
-        const segInM = i - Math.round(mi * 52 / 12);
-        const wk = Math.max(1, Math.min(5, Math.round((segInM * 4) / (52 / 12)) + 1));
-        const itemsInSeg = items.filter(x => MONTHS.indexOf(x.month) === mi && x.week === wk);
-        itemsInSeg.forEach((it, idxInSeg) => {
-          const color = CAT_COLORS[it.cat] || 'var(--accent)';
-          // Measure actual marker position after transforms
-          const svgRect = svg.getBoundingClientRect();
-          const centerX = svgRect.left + svgRect.width / 2;
-          const centerY = svgRect.top + svgRect.height / 2;
-          const markerRect = g.getBoundingClientRect();
-          const px = markerRect.left + markerRect.width / 2;
-          const py = markerRect.top + markerRect.height / 2;
-          createPersistentBubble(bubbleLayer, centerX, centerY, px, py, it, color, idxInSeg);
-          // Emphasis on hover
-          g.addEventListener('mouseenter', () => emphasizeBubble(bubbleLayer, it, true));
-          g.addEventListener('mouseleave', () => emphasizeBubble(bubbleLayer, it, false));
-        });
-      }
+      // Bubbles disabled in customer view; keep consistent
     }
   }
 
