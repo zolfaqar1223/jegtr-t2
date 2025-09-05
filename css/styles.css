@@ -487,6 +487,7 @@ svg {
   overflow: hidden;
   transition: height .22s ease, max-height .22s ease, padding .22s ease;
 }
+.activities-scroll { max-height: 420px; overflow: auto; }
 .toggle-btn[aria-expanded="false"] .chev { transform: rotate(-90deg); }
 .toggle-btn .label { opacity: 0.9; }
 

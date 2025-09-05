@@ -741,6 +741,8 @@ function render() {
   // Collapsible activities with animation
   const aToggle = document.getElementById('activitiesToggle');
   const body = document.getElementById('activitiesBody');
+  const slider = document.getElementById('actsHeight');
+  const sliderVal = document.getElementById('actsHeightVal');
   if (aToggle && body && !aToggle.dataset.bound) {
     aToggle.dataset.bound = '1';
     aToggle.addEventListener('click', () => {
@@ -750,6 +752,22 @@ function render() {
     // initial state
     const expandedInit = settings.activitiesExpanded !== false;
     setActivitiesExpanded(expandedInit);
+  }
+  // Height slider for activities
+  if (slider && sliderVal && !slider.dataset.bound) {
+    slider.dataset.bound = '1';
+    const applyH = (v) => {
+      const px = Math.max(240, Math.min(900, Number(v)||420));
+      sliderVal.textContent = px + ' px';
+      const scrollHost = document.getElementById('list');
+      if (scrollHost) {
+        scrollHost.style.maxHeight = px + 'px';
+        scrollHost.style.overflow = 'auto';
+      }
+    };
+    slider.addEventListener('input', () => applyH(slider.value));
+    // initial
+    applyH(slider.value || 420);
   }
 }
 
