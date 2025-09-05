@@ -61,3 +61,22 @@ export function getIsoWeek(date) {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
   return Math.ceil(((d - yearStart) / 86400000 + 1)/7);
 }
+
+/**
+ * Formatér dato som dd/mm/yyyy (dansk med skråstreger).
+ * Accepterer Date eller dato‑streng.
+ * @param {Date|string} input
+ * @returns {string}
+ */
+export function formatDateDK(input) {
+  try {
+    const d = (input instanceof Date) ? input : new Date(input);
+    if (isNaN(d.getTime())) return '';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  } catch {
+    return '';
+  }
+}

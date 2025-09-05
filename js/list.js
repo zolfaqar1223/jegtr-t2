@@ -4,6 +4,7 @@
 // callback‑objektet, så listen forbliver ren og uafhængig.
 
 import { sortItems, CAT_COLORS, STATUS_COLORS } from './store.js';
+import { formatDateDK } from './utils.js';
 
 // Darken a hex color by a given amount (0..1)
 function darkenHex(hex, amount = 0.35) {
@@ -93,7 +94,7 @@ export function renderList(listEl, items, callbacks) {
     meta.innerHTML = '';
     meta.appendChild(badge);
     meta.appendChild(statusBadge);
-    const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+    const dateStr = it.date ? formatDateDK(it.date) : '';
     const timeFrom = (it.timeFrom||'').trim();
     const timeTo = (it.timeTo||'').trim();
     const timeStr = timeFrom && timeTo ? `${timeFrom}-${timeTo}` : (it.date ? new Date(it.date).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' }) : '');

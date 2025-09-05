@@ -6,7 +6,7 @@
 
 import { MONTHS, CAT_COLORS, STATUS_COLORS } from './store.js';
 import { polar, segPath } from './utils.js';
-import { getIsoWeek } from './utils.js';
+import { getIsoWeek, formatDateDK } from './utils.js';
 
 /**
  * Tegn årshjulet i et givet SVG‑element.
@@ -368,7 +368,7 @@ function showEventBubble(svg, x, y, item, color) {
   if (!wrap) return;
   const bubble = document.createElement('div');
   bubble.className = 'event-bubble';
-  const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
+  const dateStr = item.date ? formatDateDK(item.date) : '';
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
@@ -426,7 +426,7 @@ function createPersistentBubble(svg, cx, cy, x, y, item, color, offsetIndex) {
   const bubble = document.createElement('div');
   bubble.className = 'event-bubble show';
   bubble.id = id;
-  const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
+  const dateStr = item.date ? formatDateDK(item.date) : '';
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
@@ -565,7 +565,7 @@ function renderQuarterBoxes(svg, layer, items, geom, transform) {
     });
     let rows = arr.map((it, idx) => {
       const color = CAT_COLORS[it.cat] || 'var(--accent)';
-      const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+      const dateStr = it.date ? formatDateDK(it.date) : '';
       const tf = (it.timeFrom||'').trim();
       const tt = (it.timeTo||'').trim();
       const tRange = tf && tt ? ` · ${tf}-${tt}` : '';

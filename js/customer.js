@@ -1,6 +1,7 @@
 // Kundevisning: read-only rendering af hjul og liste
 import { MONTHS, readItems, readNotes, CAT_COLORS, STATUSES, CATS, readSettings } from './store.js';
 import { drawWheel } from './wheel.js';
+import { formatDateDK } from './utils.js';
 
 const wheelSvg = document.getElementById('wheel');
 // timeline UI removed
@@ -64,7 +65,7 @@ function renderListReadOnly(listEl, itemsToShow) {
       meta.className = 'meta';
       const color = CAT_COLORS[it.cat] || 'var(--accent)';
       const badge = `<span class=\"badge cat\" style=\"background:rgba(255,255,255,0.06);border-color:${color};color:${color};margin-right:10px;\">${it.cat}</span>`;
-      const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : new Date().toLocaleDateString('da-DK');
+      const dateStr = it.date ? formatDateDK(it.date) : formatDateDK(new Date());
       const timeFrom = (it.timeFrom||'').trim();
       const timeTo = (it.timeTo||'').trim();
       const timeStr = timeFrom && timeTo ? `${timeFrom}-${timeTo}` : '';
@@ -138,7 +139,7 @@ function groupByMonth(arr) {
 function openViewer(item) {
   if (!viewerModal) return;
   viewerTitle.textContent = item.title;
-  const dateStr = item.date ? new Date(item.date).toLocaleDateString('da-DK') : '';
+  const dateStr = item.date ? formatDateDK(item.date) : '';
   const tf = (item.timeFrom||'').trim();
   const tt = (item.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
@@ -490,7 +491,7 @@ function renderNext(arr) {
   nextBox.className = 'item glass';
   const color = CAT_COLORS[it.cat] || 'var(--accent)';
   const weekStr = it.isoWeek ? `Uge ${it.isoWeek}` : '';
-  const dateStr = it.date ? new Date(it.date).toLocaleDateString('da-DK') : '';
+  const dateStr = it.date ? formatDateDK(it.date) : '';
   const tf = (it.timeFrom||'').trim();
   const tt = (it.timeTo||'').trim();
   const tRange = tf && tt ? ` · ${tf}-${tt}` : '';
