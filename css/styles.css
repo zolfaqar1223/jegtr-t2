@@ -569,17 +569,17 @@ svg {
   flex: 0 0 auto;
 }
 .actions button {
-  height: 34px;
-  padding: 6px 14px;
-  min-width: 96px;
-  border-radius: 10px;
-  font-size: 12px;
+  height: 30px;
+  padding: 4px 10px;
+  min-width: 84px;
+  border-radius: 8px;
+  font-size: 11px;
 }
 .actions button { white-space: nowrap; }
 
 .item .actions button {
-  font-size: 12px;
-  padding: 6px 12px;
+  font-size: 11px;
+  padding: 4px 10px;
   border-radius: 8px;
   cursor: pointer;
   line-height: 1;
