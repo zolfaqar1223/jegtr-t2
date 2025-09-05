@@ -132,6 +132,30 @@ export function drawWheel(svg, items, callbacks, opts = {}) {
     txt.textContent = ['Q1', 'Q2', 'Q3', 'Q4'][q];
     svg.appendChild(txt);
   }
+
+  // Tegn tydeligere separatorer mellem måneder (radiale linjer)
+  for (let m = 0; m < 12; m++) {
+    const monthName = MONTHS[m];
+    const showLine = !(restrictMonths && useHighlight && !hlSet.has(monthName));
+    if (!showLine) continue; // hvis vi bevidst skjuler måned
+    const a = (2 * Math.PI) * (m / 12) - Math.PI / 2;
+    const [x1, y1] = polar(cx, cy, rQuarterOuter, a);
+    const [x2, y2] = polar(cx, cy, rWeekOuter, a);
+    const sep = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    sep.setAttribute('x1', x1);
+    sep.setAttribute('y1', y1);
+    sep.setAttribute('x2', x2);
+    sep.setAttribute('y2', y2);
+    sep.setAttribute('stroke', 'rgba(255,255,255,0.42)');
+    sep.setAttribute('stroke-width', '1.4');
+    sep.setAttribute('shape-rendering', 'geometricPrecision');
+    sep.style.pointerEvents = 'none';
+    // nedton separator ved highlight, så fokus-måneder fremstår stærkere
+    if (useHighlight && !hlSet.has(monthName)) {
+      sep.setAttribute('stroke', 'rgba(255,255,255,0.22)');
+    }
+    svg.appendChild(sep);
+  }
   // Beregn antal aktiviteter per måned
   const monthCounts = {};
   items.forEach(it => {
